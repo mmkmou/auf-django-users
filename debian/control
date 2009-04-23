@@ -1,0 +1,29 @@
+Source: auf-django-users
+Section: python
+Priority: extra
+Maintainer: Thomas NOEL <thomas.noel@auf.org>
+Build-Depends: debhelper (>= 7), python-support
+Standards-Version: 3.8.0
+Homepage: http://git.auf.org/?p=thomas.git;a=tree;f=users
+
+Package: auf-django-users
+Architecture: all
+Depends: python (>= 2.3), python-support (>= 0.7.1), python-django (>= 1.0)
+Recommends: sqlite3
+Suggests: apache2, libapache2-mod-wsgi, mysql-server
+Description: Système de gestion d'utilisateurs compatible NSS
+ Système de gestion d'utilisateurs, programmé en Python avec le
+ framework Django. Typiquement, il permet le pilotage via Python/Django
+ d'une base de données compatible avec le format de libnss-mysql-bg.
+ .
+ Il propose une interface web d'administration basée sur django.contrib.admin
+ avec quelques accélérations, notamment pour le remplissage automatique
+ des dates d'expiration.
+ .
+ Il propose aussi une API en Python/Django permettant d'accéder à tous
+ les utilisateurs gérés dans la base de donnée.
+ .
+ Enfin, des applications telles que "logs" ou "mail" sont proposées, qui
+ se greffent sur l'application de base ("nss") afin de gérer automatiquement
+ le suivi des abonnements ou la gestion des comptes de messagerie.
+

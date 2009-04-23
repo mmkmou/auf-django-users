@@ -1,0 +1,27 @@
+[
+    {
+        "pk": 100,
+        "model": "nss.Group",
+        "fields": { "password": "x", "name": "users" }
+    },
+    {
+	"pk": 10000,
+	"model": "nss.User",
+	"fields": {
+		"username": "test",
+		"shell": "/bin/sh",
+		"homedir": "/home/test",
+		"min": 0,
+		"lstchg": "1970-01-02",
+		"warn": 0,
+		"source": "LOCAL",
+		"flag": 0,
+		"expire": "2010-04-07",
+		"gecos": "Utilisateur test",
+		"max": 99999,
+		"gid": 100,
+		"inact": 0,
+		"password": "x"
+	}
+    }
+]

@@ -1,0 +1,63 @@
+auf-django-users (0.4.9) unstable; urgency=low
+
+  * en route vers la 0.5 a.k.a. "y'a d'la doc dedans dit donc"
+
+ -- Thomas NOEL <thomas.noel@auf.org>  Wed, 22 Apr 2009 16:28:53 +0000
+
+auf-django-users (0.4.5) unstable; urgency=low
+
+  * correction d'un bon gros bug : `from conf` au lieu de `from aufusers.conf`
+    dans les models.py de nss et mails : cela empechait les surcharges des
+    fonctions genre maildir(). Bravo à Roger pour le coup d'oeil.
+  * j'avance dans la doc (api), je découvre les docstring et rst...
+
+ -- Thomas NOEL <thomas.noel@auf.org>  Tue, 21 Apr 2009 15:56:58 +0000
+
+auf-django-users (0.4.4) unstable; urgency=low
+
+  * on ne livre que des EXEMPLES pour aufusers.contrib
+  * templates: gestion 404 et 500 en mode DEBUG=False
+
+ -- Thomas NOEL <thomas.noel@auf.org>  Tue, 21 Apr 2009 15:07:56 +0000
+
+auf-django-users (0.4.3) unstable; urgency=low
+
+  * urls.py: /auf-django-users-doc vers la doc sphynx
+
+ -- Thomas NOEL <thomas.noel@auf.org>  Tue, 21 Apr 2009 14:34:44 +0000
+
+auf-django-users (0.4.2) unstable; urgency=low
+
+  * urls.py: redirection de / vers admin/nss/user
+
+ -- Thomas NOEL <thomas.noel@auf.org>  Tue, 21 Apr 2009 12:41:01 +0000
+
+auf-django-users (0.4.1) unstable; urgency=low
+
+  * la doc avance bien, merci sphinx !
+
+ -- Thomas NOEL <thomas.noel@auf.org>  Mon, 20 Apr 2009 15:17:40 +0000
+
+auf-django-users (0.4) unstable; urgency=low
+
+  * /usr/share/doc/auf-django-users/html : debut de la jolie doc en html
+
+ -- Thomas NOEL <thomas.noel@auf.org>  Mon, 20 Apr 2009 12:56:49 +0000
+
+auf-django-users (0.3) unstable; urgency=low
+
+  * ajout d'un système aufusers.contrib (pour ajouter des plug-ins locaux)
+
+ -- Thomas NOEL <thomas.noel@auf.org>  Fri, 17 Apr 2009 15:51:43 +0000
+
+auf-django-users (0.2) unstable; urgency=low
+
+  * gestion d'un uid minimal (conf.py: MIN_UID)
+
+ -- Thomas NOEL <thomas.noel@auf.org>  Fri, 17 Apr 2009 11:35:23 +0000
+
+auf-django-users (0.1) unstable; urgency=low
+
+  * Premiere version du paquet (test)
+
+ -- Thomas NOEL <thomas.noel@auf.org>  Thu, 16 Apr 2009 15:59:19 +0000

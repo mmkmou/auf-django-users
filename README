@@ -1,0 +1,80 @@
+
+
+Voici quelques indications pour TESTER l'application
+
+=====================================================
+La documentation pour la mise en production est sur
+file://usr/share/doc/auf-django-users/html/index.html
+=====================================================
+
+
+A. INITIALISATION
+-----------------
+
+1. Ne PAS toucher au fichier de configuration /etc/auf-django-users/conf.py
+   Ce fichier de configuration par défaut est fait pour les tests.
+
+       # extrait de /etc/auf-django-users/conf.py (début du fichier)
+       DATABASE_ENGINE = 'sqlite3'
+       DATABASE_NAME = '/tmp/base.sqlite3'
+
+   Par défaut, la base est en sqlite3 dans /tmp/base.sqlite3
+   Note : si vous aviez déjà testé une ancienne version du projet,
+   cette base peut ne plus être compatible ! Dans ce cas, effacez
+   d'abord l'ancienne base (rm /tmp/base.sqlite3)
+
+2. Initialiser cette base de données de test :
+
+     $ auf-django-users-manage.py syncdb
+
+   Note : un compte administrateur sera créé avec le login et le mot de passe
+   que vous indiquerez.
+
+B. LANCEMENT DE L'INTERFACE WEB (en mode "test")
+------------------------------------------------
+
+1. Lancer le serveur de test :
+
+     $ auf-django-users-manage.py runserver
+
+2. Aller sur http://127.0.0.1:8000/admin/
+   Connectez-vous avec le compte administrateur (créé lors de l'initialisation).
+
+   En tant qu'administrateur vous voyez absolument tout le système Django.
+   Vous verrez TOUTES les applications, seules CERTAINES nous intéressent:
+
+     Auth                          --> système d'authentification web
+      Groupes                          de Django en interne : cette appli
+      Utilisateurs                     ** ne concerne pas notre test **
+
+     Logs                          --> notre suivi de renouvellement des
+      Modifications d'expiration       abonnements (i.e. expirations)
+
+     Mail                          --> Gestion des comptes de messagerie
+      Comptes de messagerie            synchro avec nss (cf ci dessous)
+
+     Nss                           --> ** NOTRE APPLICATION MERE ! **
+      Groupes systèmes                 C'est par ici qu'il faut cliquer
+      Utilisateurs systèmes
+
+   Finalement, seule la table "Utilisateurs système" nous intéresse. Cliquez
+   dessus... et jouez !
+
+C. OBSERVATION DE LA BASE DE DONNEES
+------------------------------------
+
+Les données sont stockées dans /tmp/base.sqlite3. Pour regarder ce
+qu'elle contient, utilisez sqlite3. Par exemple :
+
+ * les utilisateurs :
+    $ sqlite3 -line /tmp/base.sqlite3 "select * from users;"
+ * les groupes :
+    $ sqlite3 -line /tmp/base.sqlite3 "select * from groups;"
+ * les associations de groupes secondaires :
+    $ sqlite3 -line /tmp/base.sqlite3 "select * from grouplist;"
+ * les logs des modifs d'expiration (pour suivi des abonnements) :
+    $ sqlite3 -line /tmp/base.sqlite3 "select * from expire_log;"
+ * les utilisateurs messagerie :
+    $ sqlite3 -line /tmp/base.sqlite3 "select * from mail_users;"
+
+
