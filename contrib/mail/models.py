@@ -12,22 +12,22 @@ from django.db.models.signals import post_save, post_delete
 from aufusers.nss.models import User
 
 # import de la configuration
-from aufusers.conf import DOMAINE, MAILDIR_BASE, MAIL, sync_nss2mail
+from conf import DOMAINE, MAILDIR_BASE, MAIL, sync_nss2mail
 
 try:
-    from aufusers.conf import mail
+    from conf import mail
 except:
     def mail(user):
         return "%s@%s" % (user.username, DOMAINE)
 
 try:
-    from aufusers.conf import addr_from
+    from conf import addr_from
 except:
     def addr_from(user):
         return mail(user)
 
 try:
-    from aufusers.conf import maildir
+    from conf import maildir
 except:
     def maildir(user):
         return "%s/%s" % (MAILDIR_BASE, user.username)

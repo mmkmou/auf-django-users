@@ -11,7 +11,7 @@ clean:
 install: sphinx
 	mkdir -p $(APPDIR) $(CONFDIR) $(BINDIR) $(SHAREDIR) $(LOCALDIR)
 	# on copie les applications et leur dépendances
-	for appli in nss logs mail lib \
+	for appli in nss lib \
 		     settings.py urls.py __init__.py ; do \
 		cp -r $$appli $(APPDIR); \
 	done

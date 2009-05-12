@@ -83,7 +83,22 @@ Tables de l'application
             UNIQUE ("uid", "gid")
     );
 
-**mail_users**
+Tables des contribs classiques (logs et mail)
+`````````````````````````````````````````````
+
+**expire_log** de contrib.logs
+  pour le suivi des modifications des dates d'expiration (donc le suivi des abonnements)::
+
+    CREATE TABLE "expire_log" (
+            "id" integer NOT NULL PRIMARY KEY,
+            "username" varchar(128) NOT NULL,
+            "creation" datetime NOT NULL,
+            "modification" datetime NOT NULL,
+            "expire" date NOT NULL,
+            "total_jours" integer NOT NULL
+    );
+  
+**mail_users** de contrib.mail
   compte de messagerie (en général synchronisés avec les utilisateurs)::
 
     CREATE TABLE "mail_users" (
@@ -97,18 +112,6 @@ Tables de l'application
             "source" varchar(10) NOT NULL
     );
 
-**expire_log**
-  pour le suivi des modifications des dates d'expiration (donc le suivi des abonnements)::
-
-    CREATE TABLE "expire_log" (
-            "id" integer NOT NULL PRIMARY KEY,
-            "username" varchar(128) NOT NULL,
-            "creation" datetime NOT NULL,
-            "modification" datetime NOT NULL,
-            "expire" date NOT NULL,
-            "total_jours" integer NOT NULL
-    );
-  
 
 Tables Django
 `````````````

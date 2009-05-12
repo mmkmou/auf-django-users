@@ -23,7 +23,8 @@ Description: Système de gestion d'utilisateurs compatible NSS
  Il propose aussi une API en Python/Django permettant d'accéder à tous
  les utilisateurs gérés dans la base de donnée.
  .
- Enfin, des applications telles que "logs" ou "mail" sont proposées, qui
- se greffent sur l'application de base ("nss") afin de gérer automatiquement
- le suivi des abonnements ou la gestion des comptes de messagerie.
+ Enfin, des applications telles que "contrib.logs" ou "contrib.mail" sont
+ proposées, qui se greffent sur l'application de base ("nss") afin de gérer
+ automatiquement le suivi des abonnements ou la gestion des comptes de
+ messagerie.
 

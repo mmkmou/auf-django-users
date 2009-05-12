@@ -44,18 +44,6 @@ aufusers.nss.models
 .. automodule:: aufusers.nss.models
    :members: User, Group, GroupList
 
-aufusers.mail.models
---------------------
-
-.. automodule:: aufusers.mail.models
-   :members: MailUser, user_post_save, user_post_delete
-
-aufusers.logs.models
---------------------
-
-.. automodule:: aufusers.logs.models
-   :members: LogExpire
-
 Accès direct via aufusers
 -------------------------
 
@@ -74,4 +62,22 @@ on peut juste faire : ::
   from aufusers import User, Group, GroupList
 
   # accès à des objets User, Group ou GroupList
+
+
+API de contribs classiques
+--------------------------
+
+aufusers.contrib.logs.models
+````````````````````````````
+
+Il s'agit d'une contrib que tout le monde l'activera sans doute.
+
+.. automodule:: aufusers.contrib.logs.models
+   :members: LogExpire
+
+aufusers.contrib.mail.models
+````````````````````````````
+
+.. automodule:: aufusers.contrib.mail.models
+   :members: MailUser
 

@@ -1,6 +1,11 @@
 TODO
 ====
 
+0.5
+---
+
+ logs => système complet avec historique de toutes les modifs (pas seulement dates d'expiration)
+
 0.6
 ---
 
@@ -8,12 +13,6 @@ TODO
 
  validateurs sur username (a-z0-9._@:-), champs GECOS, etc...
    note => quelle exception déclencher lors du save en cas de pépin ?
-
- renommages à faire :
-     logs => contrib.logs
-     mail => contrib.mail
-
- logs => système complet avec historique de toutes les modifs (pas seulement dates d'expiration
 
 > 0.6
 -----

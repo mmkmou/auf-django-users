@@ -74,8 +74,6 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     # la base "centrale"
     'aufusers.nss',
-    # le système de logs (qui écoute l'activité sur users.nss)
-    'aufusers.logs',
     # les comptes de messagerie (avec synchro sur users.nss)
     'aufusers.mail',
 ) + INSTALLED_APPS_MORE
