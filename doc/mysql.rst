@@ -142,9 +142,13 @@ Si vous n'avez pas encore de base MySQL de gestion de vos utilisateurs, l'applic
 
  #. Dans ``/etc/auf-django-users/conf.py``, indiquez l'utilisateur ``nsscreate`` (celui qui a tous les droits sur la base)
 
- #. Lancer la création des tables et des données initiales : ::
+ #. Lancer la création des tables : ::
     
     $ auf-django-users-manage.py syncdb
+
+ #. Vous pouvez alor sajouter un utilisateur et un groupe initial dans la base : ::
+
+    $ auf-django-users-manage.py loaddata utilisateur_test
 
  #. Dans ``/etc/auf-django-users/conf.py``, changez l'utilisateur pour
     ``nssadmin`` (qui n'a pas les droits de modification de la structure des

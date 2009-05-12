@@ -30,6 +30,11 @@ A. INITIALISATION
    Note : un compte administrateur sera créé avec le login et le mot de passe
    que vous indiquerez.
 
+3. Insérer un utilisateur et un groupe initial dans la base :
+
+     $ auf-django-users-manage.py loaddata utilisateur_test
+
+
 B. LANCEMENT DE L'INTERFACE WEB (en mode "test")
 ------------------------------------------------
 
