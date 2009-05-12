@@ -72,9 +72,7 @@ INSTALLED_APPS = (
     #'django.contrib.sites',
     'django.contrib.admin',
     'django.contrib.admindocs',
-    # la base "centrale"
+    # notre application
     'aufusers.nss',
-    # les comptes de messagerie (avec synchro sur users.nss)
-    'aufusers.mail',
 ) + INSTALLED_APPS_MORE
 
