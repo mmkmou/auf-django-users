@@ -1,7 +1,8 @@
 # -*- encoding: utf-8 -*-
 
 #
-# Gestion de la messagerie
+# Configuration de contrib.mail
+# (création d'une table mail synchronisée avec les users NSS)
 #
 
 # domaine par défaut des comptes de messagerie

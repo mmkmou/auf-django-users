@@ -26,8 +26,15 @@ Tout ce qui est programmable en Django et/ou en Python !
 Deux contribs classiques
 ````````````````````````
 
- * ``contrib.logs`` : suivi de l'activité sur les comptes NSS
- * ``contrib.mail`` : synchronisation des comptes NSS vers une table pour la messagerie
+ * ``contrib.logs`` : suivi de l'activité sur les comptes NSS. Cette contrib
+   est activée par défaut.
+ * ``contrib.mail`` : synchronisation des comptes NSS vers une table pour la
+   messagerie. A noter que sa configuration se fait dans le fichier
+   ``/etc/auf-django-users/contrib.mail.conf.py``
+
+.. Warning:: Ne modifiez pas ces contribs, vos modifications seraient perdues à
+  la prochaine mise à jour de auf-django-users. Si vous désirez adapter un de
+  ces contribs, faites en copie et activez-la à la place de l'originale.
 
 D'autres exemples pour vous inspirer
 ````````````````````````````````````
@@ -38,15 +45,16 @@ Quelques exemples sont visibles dans ``/usr/lib/auf-django-users/contrib`` :
  * ``EXEMPLE_plugin_user`` : un exemple de connexion sur les objets nss.User
 
 
-D'autres idées à développer
-```````````````````````````
+Des idées de contribs à écrire
+``````````````````````````````
 
- * Gestion des données 
+ * Gestion des données qualitatives (nom, prénoms, genre, naissance, adresses,
+   établissement, etc)
  * Gestion du système VoIP
  * ...
 
-Comment activer un contrib ?
-----------------------------
+Comment activer une contrib ?
+-----------------------------
 
 Si elle existe, lire la documentation du contrib : il y aura peut-être des
 manipulations particulières à faire. S'il n'y a pas de documentation, essayez
@@ -58,4 +66,9 @@ de données, la procédure est généralement la suivante :
  #. ajouter le contrib dans le tuple ``INSTALLED_APPS_MORE`` à la fin du fichier ``/etc/auf-django-users/conf.py``
  #. relancer l'application, c'est-à-dire le serveur qui l'héberge en général
  #. normalement, si la contrib est bien programmée, c'est tout
+
+Rappel : la contrib ``contrib.mail`` se configure dans le fichier
+``/etc/auf-django-users/contrib.mail.conf.py``. De plus si vous l'activez,
+cette contrib a besoin d'une table. Si elle n'existe pas, il faudra lancer
+``syncdb`` pour que Django la créer.
 

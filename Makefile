@@ -15,12 +15,21 @@ install: sphinx
 		     settings.py urls.py __init__.py ; do \
 		cp -r $$appli $(APPDIR); \
 	done
+	# on copie les données "statiques"
 	for share in media templates aufusers.wsgi ; do \
 		cp -r $$share $(SHAREDIR); \
 	done
-	cp -r contrib $(LOCALDIR)
-	cp conf.py apache.conf $(CONFDIR)
+	#
+	# le script manage.py de gestion django, adapté à auf-django-users
 	cp auf-django-users-manage.py $(BINDIR)
+	#
+	# contribs
+	cp -r contrib $(LOCALDIR)
+	#
+	# configurations
+	cp conf.py apache.conf $(CONFDIR)
+	# la conf de contrib.mail sera dans /etc/auf-django-users/
+	mv $(LOCALDIR)/contrib/mail/conf.py $(CONFDIR)/contrib.mail.conf.py
 
 sphinx:
 	if which sphinx-build; then \

@@ -1,9 +1,11 @@
 auf-django-users (0.4.999) jaunty; urgency=low
 
   * logs devient contrib.logs, activée par défaut
-  * mail devient contrib.mail, non activée par défaut
+  * mail devient contrib.mail, non activée par défaut. Sa configuration se fait
+    dans /etc/auf-django-users/contrib.mail.conf.py
+  * doc/contrib.rst : début de doc sur les contrib
 
- -- Thomas NOEL <thomas.noel@auf.org>  Tue, 12 May 2009 17:03:20 +0000
+ -- Thomas NOEL <thomas.noel@auf.org>  Tue, 12 May 2009 17:42:52 +0000
 
 auf-django-users (0.4.9) unstable; urgency=low
 

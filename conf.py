@@ -67,3 +67,7 @@ INSTALLED_APPS_MORE = (
     # 'aufusers.contrib.mail',
 )
 
+
+# note : la configuration de contrib.mail se fait dans le fichier
+# /etc/auf-django-users/contrib.mail.conf.py
+

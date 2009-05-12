@@ -4,13 +4,14 @@ Documentation de auf-django-users
 Le système auf-django-users est un projet Django qui propose :
 
  * une interface Web d'accès à une base d'authentification compatibe ``libnss-mysql-bg``
- * la création d'une telle base si elle n'existe pas
+ * une aide pour la création de cette base si elle n'existe pas
  * une API permettant d'accéder aux données de la base via des objets Python
  * la possibilité d'ajouter des extensions (*contrib*), c'est-à-dire d'autres
-   applications connectées à la notion d'utilisateur (mais pas seulement...)
+   applications liées à la notion d'utilisateur
 
-Cette documentation explique comment mettre en place le système : mise en ligne
-via le serveur Web Apache2 et connexion à une base de donnée MySQL.
+Cette documentation décrit l'application et explique comment mettre en
+production le système : mise en ligne via le serveur Web Apache2 et connexion à
+une base de donnée MySQL.
 
 .. toctree::
    :maxdepth: 2

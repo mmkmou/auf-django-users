@@ -1,2 +1,3 @@
 etc/auf-django-users/conf.py usr/share/python-support/auf-django-users/aufusers/conf.py
+etc/auf-django-users/contrib.mail.conf.py usr/share/python-support/auf-django-users/aufusers/contrib/mail/conf.py
 usr/lib/auf-django-users/contrib usr/share/python-support/auf-django-users/aufusers/contrib

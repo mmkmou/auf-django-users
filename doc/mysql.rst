@@ -87,7 +87,7 @@ Tables des contribs classiques (logs et mail)
 `````````````````````````````````````````````
 
 **expire_log** de contrib.logs
-  pour le suivi des modifications des dates d'expiration (donc le suivi des abonnements)::
+  pour le suivi des modifications des dates d'expiration (donc le suivi des abonnements) : ::
 
     CREATE TABLE "expire_log" (
             "id" integer NOT NULL PRIMARY KEY,
@@ -99,7 +99,8 @@ Tables des contribs classiques (logs et mail)
     );
   
 **mail_users** de contrib.mail
-  compte de messagerie (en général synchronisés avec les utilisateurs)::
+  comptes de messagerie (en général synchronisés avec les utilisateurs). Cette table n'est
+  nécessaire que si ``contrib.mail`` est activée, ce qui n'est pas le cas par défaut : ::
 
     CREATE TABLE "mail_users" (
             "username" varchar(128) NOT NULL PRIMARY KEY,
