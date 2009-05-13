@@ -60,6 +60,17 @@ class UserAdmin(admin.ModelAdmin):
     )
     ordering = ( '-modification', )
     inlines = [GroupListInline]
+    # on conserve l'agent qui a rempli le formulaire web dans user.agent
+    # voir http://docs.djangoproject.com/en/1.0/ref/contrib/admin/#modeladmin-methods
+    def save_model(self, request, user, form, change):
+        user.agent = request.user
+        user.save()
+    def save_formset(self, request, form, formset, change):
+        instances = formset.save(commit=False)
+        for instance in instances:
+            instance.agent = request.user
+            instance.save()
+        formset.save_m2m()
 
 
 admin.site.register(User, UserAdmin)
