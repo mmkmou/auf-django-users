@@ -1,8 +1,19 @@
 TODO
 ====
 
+0.5
+---
+
+ - log, cas expire : ajouter dans les détails le nombre de jour en + ou en -
+
+ - doc sur la gestion des droits des users Django
+
 0.6
 ---
+
+ log : proposer des méthodes pour déterminer les dates d'abo d'une personne,
+       ou bien le nombre d'abo pendant une période donnée, etc... (bon, là, faut
+       refléchir, faire un peu d'algo...)
 
  doc sur la creation de contrib
 
