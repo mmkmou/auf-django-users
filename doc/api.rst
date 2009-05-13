@@ -67,16 +67,16 @@ on peut juste faire : ::
 API de contribs classiques
 --------------------------
 
-aufusers.contrib.logs.models
-````````````````````````````
+contrib.log
+```````````
 
-Il s'agit d'une contrib que tout le monde l'activera sans doute.
+Il s'agit d'une contrib que tout le monde activera sans doute. D'ailleurs, elle est activée par défaut.
 
-.. automodule:: aufusers.contrib.logs.models
-   :members: LogExpire
+.. automodule:: aufusers.contrib.log.models
+   :members: Log
 
-aufusers.contrib.mail.models
-````````````````````````````
+contrib.mail
+````````````
 
 .. automodule:: aufusers.contrib.mail.models
    :members: MailUser

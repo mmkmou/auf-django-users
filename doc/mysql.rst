@@ -83,19 +83,20 @@ Tables de l'application
             UNIQUE ("uid", "gid")
     );
 
-Tables des contribs classiques (logs et mail)
+Tables des contribs classiques (log et mail)
 `````````````````````````````````````````````
 
-**expire_log** de contrib.logs
-  pour le suivi des modifications des dates d'expiration (donc le suivi des abonnements) : ::
+**log** de contrib.log
+  pour le suivi des modifications des comptes : ::
 
-    CREATE TABLE "expire_log" (
+    CREATE TABLE "log" (
             "id" integer NOT NULL PRIMARY KEY,
-            "username" varchar(128) NOT NULL,
-            "creation" datetime NOT NULL,
-            "modification" datetime NOT NULL,
-            "expire" date NOT NULL,
-            "total_jours" integer NOT NULL
+            "username" varchar(64) NOT NULL,
+            "creation" datetime NOT NULL
+            "type" varchar(16) NOT NULL,
+            "details" varchar(32) NOT NULL,
+            "date" datetime NOT NULL,
+            "agent" varchar(32) NOT NULL
     );
   
 **mail_users** de contrib.mail

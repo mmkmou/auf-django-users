@@ -63,7 +63,8 @@ DEFAULT_GID = 100
 #   'aufusers.contrib.sync_mail_base_externe',
 # )
 INSTALLED_APPS_MORE = (
-    'aufusers.contrib.logs',
+    'aufusers.contrib.log',
+    # 'aufusers.contrib.log_expire',
     # 'aufusers.contrib.mail',
 )
 

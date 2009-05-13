@@ -77,8 +77,8 @@ qu'elle contient, utilisez sqlite3. Par exemple :
     $ sqlite3 -line /tmp/base.sqlite3 "select * from groups;"
  * les associations de groupes secondaires :
     $ sqlite3 -line /tmp/base.sqlite3 "select * from grouplist;"
- * les logs des modifs d'expiration (pour suivi des abonnements) :
-    $ sqlite3 -line /tmp/base.sqlite3 "select * from expire_log;"
+ * suivi des abonnements :
+    $ sqlite3 -line /tmp/base.sqlite3 "select * from log;"
 
 Si vous activez la contrib.mail (voir fin de conf.py) :
  * les utilisateurs messagerie :

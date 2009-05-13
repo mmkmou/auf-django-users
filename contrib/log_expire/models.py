@@ -46,7 +46,7 @@ class LogExpire(models.Model):
         default=0)
 
     class Meta:
-        db_table = "expire_log"
+        db_table = "log_expire"
         verbose_name = "modification d'expiration"
         verbose_name_plural = "modifications d'expiration"
         get_latest_by = "modification"

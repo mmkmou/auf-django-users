@@ -1,3 +1,12 @@
+auf-django-users (0.4.9999) unstable; urgency=low
+
+  * contrib.log : système de log de toutes les modifs des comptes NSS
+  * logs devient log_expire et est désactivée par défaut, la
+    table associée s'appelle aussi log_expire (et non plus expire_log)
+  * mise à jour de la doc en conséquence (hé ouais... même ça...)
+
+ -- Thomas NOEL <thomas.noel@auf.org>  Wed, 13 May 2009 16:06:11 +0000
+
 auf-django-users (0.4.999) unstable; urgency=low
 
   * logs devient contrib.logs, activée par défaut
