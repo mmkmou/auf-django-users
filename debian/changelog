@@ -1,3 +1,11 @@
+auf-django-users (0.5.1) unstable; urgency=low
+
+  * documentation /usr/share/doc/auf-django-users/html mieux
+    structurée : on sépare clairement la description de aufusers.nss
+    (le noyau) de cette des contribs (log et mail)
+
+ -- Thomas NOEL <thomas.noel@auf.org>  Thu, 14 May 2009 18:03:59 +0000
+
 auf-django-users (0.5) unstable; urgency=low
 
   * 0.5. Voilà. Fin du début. Ouf.
