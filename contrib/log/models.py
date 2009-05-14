@@ -70,12 +70,16 @@ class Log(models.Model):
     username_creation.short_description = 'utilisateur'
     username_creation.admin_order_field = 'username'
 
-    def colored_type(self):
-        """Affichage du type de modification, en couleur et en odorama"""
-        return u'<span style="%s">%s</span>' % (MODIFICATION_STYLES[self.type], self.get_type_display())
-    colored_type.short_description = "Type de la modification"
-    colored_type.allow_tags = True
-    colored_type.admin_order_field = 'type'
+    def colored_modif(self):
+        """Affichage de la modification, en couleur et en odorama"""
+        if self.details:
+            modif = "%s : %s" % (self.get_type_display(), self.details)
+        else:
+            modif = self.get_type_display()
+        return u'<span style="%s">%s</span>' % (MODIFICATION_STYLES[self.type], modif)
+    colored_modif.short_description = "Modification"
+    colored_modif.allow_tags = True
+    colored_modif.admin_order_field = 'type'
 
     def save(self, force_insert=False, force_update=False):
         """
