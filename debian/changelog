@@ -1,3 +1,13 @@
+auf-django-users (0.5) unstable; urgency=low
+
+  * 0.5. Voilà. Fin du début. Ouf.
+  * un petit schéma dans la doc
+  * logs plus robustes (on ne loggue que dans le post_save, le pre_save
+    ne sert qu'à retenir les modifications)
+  * logs en couleur et en odorama
+
+ -- Thomas NOEL <thomas.noel@auf.org>  Thu, 14 May 2009 12:43:46 +0000
+
 auf-django-users (0.4.9999) unstable; urgency=low
 
   * contrib.log : système de log de toutes les modifs des comptes NSS
