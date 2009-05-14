@@ -24,6 +24,16 @@ MODIFICATION_TYPES = (
     ('other','Autre modification'),
 )
 
+# style de l'affichage des type de modifs dans l'admin
+MODIFICATION_STYLES = {
+    'create': 'color: green;',
+    'delete': 'color: red; text-decoration: line-through;',
+    'password': 'color: red;',
+    'expire': 'color: blue;',
+    'gecos': 'color: black;',
+    'other': 'color: black;',
+}
+
 class Log(models.Model):
     """
     Un *Log* représente une modification d'un certain utilisateur à un certain moment.
@@ -43,12 +53,12 @@ class Log(models.Model):
         choices=MODIFICATION_TYPES, default='other', blank=False)
     details = models.CharField("détails", max_length=128, default='')
     date = models.DateTimeField("date de la modification", auto_now_add=True)
-    agent = models.CharField("nom du modificateur", max_length=32)
+    agent = models.CharField("modificateur", max_length=32)
 
     class Meta:
         db_table = "log"
-        verbose_name = "modification d'un compte"
-        verbose_name_plural = "modifications des comptes"
+        verbose_name = "suivi d'un compte"
+        verbose_name_plural = "suivis des comptes"
 
     def __unicode__(self):
         return u"%s : modification %s le %s par %s" % \
@@ -59,6 +69,13 @@ class Log(models.Model):
         return u"%s (crée le %s)" % (self.username, self.creation.date())
     username_creation.short_description = 'utilisateur'
     username_creation.admin_order_field = 'username'
+
+    def colored_type(self):
+        """Affichage du type de modification, en couleur et en odorama"""
+        return u'<span style="%s">%s</span>' % (MODIFICATION_STYLES[self.type], self.get_type_display())
+    colored_type.short_description = "Type de la modification"
+    colored_type.allow_tags = True
+    colored_type.admin_order_field = 'type'
 
     def save(self, force_insert=False, force_update=False):
         """
@@ -83,35 +100,12 @@ class Log(models.Model):
 # et agir en fonction
 #
 
-# logs de la création des comptes (post_save)
-def user_post_save(sender, **kwargs):
-    """Procédure lancée après l'ajout ou la modification d'un abonné.
-    S'il s'agit d'une création (kwargs['created'] à True), alors
-    on loge la création."""
-    if kwargs['created'] :
-        user = kwargs['instance']
-        # on ne loge que les comptes locaux
-        if user.source == 'LOCAL':
-            # agent = la personne qui a fait la modification. Si la modification a été
-            # faite par le formulaire web, on aura un attribut 'user.agent', sinon on
-            # prend la valeur '<api>'
-            try:
-                agent = user.agent.username
-            except:
-                agent = '<api>'
-            details = "uid %s, nom complet '%s'" % (user.uid, user.gecos)
-            Log( username = user.username, creation = user.creation,
-                 type = 'create', agent = agent , details = details ).save()
-
-# connexion au signal "abonné enregistré"
-post_save.connect(user_post_save, sender=User)
-
-
-# logs des modifications (pre_save)
+# détection des modifications (lors du pre_save)
 def user_pre_save(sender, **kwargs):
     """Procédure lancée avant chaque modification d'un abonné. On compare
-    les données avec l'utilisateur actuel, et on loge toutes les modifications
-    constatées."""
+    les données avec l'utilisateur actuel, et on conserve dans un attribut
+    log_post_save toutes les modifications constatées. Ces modifications seront
+    logées lors du post_save, donc quand le save() aura vraiment fonctionné."""
     user = kwargs['instance']
     # on ne comptabilise que les comptes locaux
     if user.source != 'LOCAL':
@@ -128,26 +122,56 @@ def user_pre_save(sender, **kwargs):
         current = User.objects.get(username=user.username, creation=user.creation)
     except User.DoesNotExist:
         # Si l'utilisateur n'existe pas encore, comme on est dans le pre_save 
-        # c'est qu'il s'agit d'une création : on logera dans le post_save,
+        # c'est qu'il s'agit d'une création : le log se fera load du post_save,
         # car c'est lors du post_save qu'on aura la donnée user.creation
         return
+    # on stocke chaque modification détectée dans un dictionnaire log_post_save
+    # que l'on ajoute comme attribut à user
+    user.log_post_save={}
     if password_crypt( user.password ) != current.password:
-        Log( username=user.username, creation=user.creation,
-             type='password', agent = agent).save()
+        user.log_post_save['password'] = ''
     if user.expire != current.expire:
-        details = "%s -> %s" % (current.expire, user.expire)
-        Log( username=user.username, creation=user.creation,
-             type='expire', agent = agent, details = details).save()
+        user.log_post_save['expire'] = "%s -> %s (%+d)" % (current.expire, user.expire, (user.expire-current.expire).days)
     if user.gecos != current.gecos:
-        details = "'%s' -> '%s'" % (current.gecos, user.gecos)
-        Log( username=user.username, creation=user.creation,
-             type='gecos', agent = agent, details = details).save()
+        user.log_post_save['gecos'] = "'%s' -> '%s'" % (current.gecos, user.gecos)
 
 # connexion au signal "abonné enregistré"
 pre_save.connect(user_pre_save, sender=User)
 
 
-# log de la suppresion des comptes
+# log des créations/modifications des comptes (post_save)
+def user_post_save(sender, **kwargs):
+    """Procédure lancée après l'ajout ou la modification d'un abonné.
+    S'il s'agit d'une création alors on log la création, sinon on log les
+    modifications détectées lors du pre_save."""
+    user = kwargs['instance']
+    # on ne log que pour les comptes locaux
+    if user.source == 'LOCAL':
+        # agent = la personne qui a fait la modification. Si la modification a été
+        # faite par le formulaire web, on aura un attribut 'user.agent', sinon on
+        # prend la valeur '<api>'
+        try:
+            agent = user.agent.username
+        except:
+            agent = '<api>'
+        if kwargs['created'] :
+            # il s'agit d'une création
+            details = "uid %s, nom complet '%s'" % (user.uid, user.gecos)
+            Log( username = user.username, creation = user.creation,
+                 type = 'create', agent = agent , details = details ).save()
+        else:
+            # c'est une modification : on enregistre ce qui avait été
+            # détecté lors du pre_save
+            for type in getattr(user,'log_post_save',()):
+                Log( username = user.username, creation = user.creation,
+                     type = type, details = user.log_post_save[type],
+                     agent = agent ).save()
+
+# connexion au signal "abonné enregistré"
+post_save.connect(user_post_save, sender=User)
+
+
+# log de la suppression des comptes (post_delete)
 def user_post_delete(sender, **kwargs):
     """Procédure lancée après chaque suppression d'un abonné.
 
@@ -160,7 +184,8 @@ def user_post_delete(sender, **kwargs):
     # agent = la personne qui a fait la modification. Si la modification a été
     # faite par le formulaire web, on aura un attribut 'user.agent', sinon on
     # prend la valeur '<api>'
-    # FIXME : ça ne marche pas pour le delete... à voir...
+    # FIXME : ça ne marchera pas pour le delete
+    #         cf http://code.djangoproject.com/ticket/11108
     try:
         agent = user.agent.username
     except:
