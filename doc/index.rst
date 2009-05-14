@@ -19,8 +19,8 @@ une base de donnée MySQL.
    :maxdepth: 2
 
    premiers-pas
-   wsgi
    mysql
+   wsgi
    api
    contrib
 

@@ -1,5 +1,5 @@
-Extensions, greffons, *plug-ins* : les contribs
-===============================================
+Les contribs : généralités
+==========================
 
 Les contribs sont des applications Django placées dans le répertoire
 ``/usr/lib/auf-django-users/contrib``.
@@ -66,7 +66,7 @@ Des idées de contribs à écrire
 Comment activer une contrib ?
 -----------------------------
 
-Si elle existe, lire la documentation du contrib : il y aura peut-être des
+Si elle existe, lire la documentation de la contrib : il y aura peut-être des
 manipulations particulières à faire. S'il n'y a pas de documentation, essayez
 de comprendre le code source Python avant d'activer n'importe quoi... Si vous
 êtes perdu, posez la question sur la liste de discussion de l'AUF avant toute
@@ -79,23 +79,13 @@ de données, la procédure est généralement la suivante :
  #. relancer l'application auf-django-users (en général un *restart* de Apache)
  #. normalement, si la contrib est bien programmée, c'est tout !
 
-Activation de contrib.mail
-``````````````````````````
-La contrib ``contrib.mail`` se configure dans le fichier
-``/etc/auf-django-users/contrib.mail.conf.py``. Par ailleurs cette contrib a
-besoin d'une table ``mail_user``. Si elle n'existe pas, il faudra lancer
-``syncdb`` pour que Django la créé.
 
-Activation de contrib.log_expire
-````````````````````````````````
-Cette contrib a besoin d'une table ``log_expire`` : il faut lancer un ``syncdb``
-pour que Django la créé.
+Description des contribs fournies
+---------------------------------
 
-Activation de contrib.log
-`````````````````````````
-Rappel : cette contrib est activée par défaut, il est donc possible que la table
-``log`` existe déjà dans votre base de donnée.
+.. toctree::
+   :maxdepth: 2
 
-Si la table ``log`` associée à la contrib ``contrib.log`` n'existe pas, vous
-devez la créer avec un ``syncdb``.
+   contrib-log
+   contrib-mail
 

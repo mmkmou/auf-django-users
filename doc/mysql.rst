@@ -20,14 +20,21 @@ Les paramètres de connexion à la base doivent être indiqués dans ``/etc/auf-
   DATABASE_HOST = '219.87.23.11'    # laisser vide si la base est local (localhost)
   DATABASE_PORT = ''                # laisser vide pour le port MySQL par défaut
 
-Si l'application était déjà fonctionnement via Apache/WSGI, il faut relancer
-complétement le serveur avec ``# apache2ctl restart``
+Si l'application était déjà fonctionnement via un serveur (Apache/WSGI ou
+``runserver``), il faut relancer complétement le serveur (avec ``# apache2ctl
+restart`` pour Apache, ou en relançant un autre ``runserver``).
+
 
 Tables de la base
 -----------------
 
-Tables de l'application
-```````````````````````
+Si vous n'avez pas du tout de base de donnée MySQL pour ``libnss-mysql-bg``,
+alors Django les créera pour vous (voir plus loin). Sinon, il faut adapter vos
+tables pour qu'elles suivent les schémas ci-dessous.
+
+Tables de l'application nss
+```````````````````````````
+
 **users**
   les utilisateurs, au sens *nss*::
 
@@ -83,38 +90,6 @@ Tables de l'application
             UNIQUE ("uid", "gid")
     );
 
-Tables des contribs classiques (log et mail)
-`````````````````````````````````````````````
-
-**log** de contrib.log
-  pour le suivi des modifications des comptes : ::
-
-    CREATE TABLE "log" (
-            "id" integer NOT NULL PRIMARY KEY,
-            "username" varchar(64) NOT NULL,
-            "creation" datetime NOT NULL
-            "type" varchar(16) NOT NULL,
-            "details" varchar(32) NOT NULL,
-            "date" datetime NOT NULL,
-            "agent" varchar(32) NOT NULL
-    );
-  
-**mail_users** de contrib.mail
-  comptes de messagerie (en général synchronisés avec les utilisateurs). Cette table n'est
-  nécessaire que si ``contrib.mail`` est activée, ce qui n'est pas le cas par défaut : ::
-
-    CREATE TABLE "mail_users" (
-            "username" varchar(128) NOT NULL PRIMARY KEY,
-            "password" varchar(64) NOT NULL,
-            "expire" integer NOT NULL,
-            "fullname" varchar(128) NOT NULL,
-            "maildir" varchar(256) NOT NULL,
-            "mail" varchar(128) NOT NULL UNIQUE,
-            "addr_from" varchar(128) NOT NULL,
-            "source" varchar(10) NOT NULL
-    );
-
-
 Tables Django
 `````````````
 
@@ -130,7 +105,8 @@ crééra si besoin.
 Création d'une base (à partir de rien)
 --------------------------------------
 
-Si vous n'avez pas encore de base MySQL de gestion de vos utilisateurs, l'application ``auf-django-users`` vous permet de la créer facilement :
+Si vous n'avez pas encore de base MySQL de gestion de vos utilisateurs,
+l'application ``auf-django-users-manage.py`` vous permet de la créer facilement : 
 
  #. Créez une base ``auth`` sur votre serveur MySQL. Attention à ce que cette base utilise bien l'encodage **utf8** !
 
@@ -143,7 +119,7 @@ Si vous n'avez pas encore de base MySQL de gestion de vos utilisateurs, l'applic
     - ``nssread`` : droits SELECT partout *sauf sur les champs password*
     - ``nssreads`` : droits SELECT partout
 
-    .. TODO ajoute les commandes correspondantes
+    .. TODO ajouter les commandes correspondantes
 
  #. Dans ``/etc/auf-django-users/conf.py``, indiquez l'utilisateur ``nsscreate`` (celui qui a tous les droits sur la base)
 
@@ -159,7 +135,8 @@ Si vous n'avez pas encore de base MySQL de gestion de vos utilisateurs, l'applic
     ``nssadmin`` (qui n'a pas les droits de modification de la structure des
     tables)
 
- #. Si votre application est hébergée en WSGI sur Apache, n'oubliez pas de re-lancer ce dernier : ::
+ #. Si votre application est hébergée en WSGI sur Apache, n'oubliez pas de
+    relancer ce dernier : ::
 
     # apache2ctl restart
 
