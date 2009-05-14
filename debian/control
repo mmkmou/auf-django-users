@@ -2,9 +2,9 @@ Source: auf-django-users
 Section: python
 Priority: extra
 Maintainer: Thomas NOEL <thomas.noel@auf.org>
-Build-Depends: debhelper (>= 7), python-support
+Build-Depends: debhelper (>= 7), python-support, dia
 Standards-Version: 3.8.0
-Homepage: http://git.auf.org/?p=thomas.git;a=tree;f=users
+Homepage: http://git.auf.org/?p=thomas.git;a=tree;f=auf-django-users
 
 Package: auf-django-users
 Architecture: all

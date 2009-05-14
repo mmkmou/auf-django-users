@@ -9,6 +9,8 @@ Le système auf-django-users est un projet Django qui propose :
  * la possibilité d'ajouter des extensions (*contrib*), c'est-à-dire d'autres
    applications liées à la notion d'utilisateur
 
+.. image:: auf-django-users.*
+
 Cette documentation décrit l'application et explique comment mettre en
 production le système : mise en ligne via le serveur Web Apache2 et connexion à
 une base de donnée MySQL.
