@@ -1,12 +1,11 @@
 TODO
 ====
 
-0.5
----
-
- - log, cas expire : ajouter dans les détails le nombre de jour en + ou en -
+0.5.x+1
+-------
 
  - doc sur la gestion des droits des users Django
+ - quelques scripts d'exemple d'utilisation concrete de import aufusers
 
 0.6
 ---
@@ -25,7 +24,7 @@ TODO
 
 proposer d'autres contribs
 
-idée pour une plus jolie gestion :
+idée de contrib pour une plus jolie gestion :
  * un modèle "Utilisateur" qui contient toutes les infos qualitatives (genre, établsst, etc)
       clé = (login + date de création) pour permettre la conservation d'un historique
       champ total_jours => géré via le module de stats
