@@ -1,3 +1,9 @@
+auf-django-users (0.5.2) unstable; urgency=low
+
+  * debian/contrib: ajout d'un recommends python-mysqldb
+
+ -- Thomas NOEL <thomas.noel@auf.org>  Mon, 18 May 2009 09:04:32 +0000
+
 auf-django-users (0.5.1) unstable; urgency=low
 
   * documentation /usr/share/doc/auf-django-users/html mieux
