@@ -5,10 +5,10 @@
         "fields": { "password": "x", "name": "users" }
     },
     {
-	"pk": 10000,
+	"pk": "test",
 	"model": "nss.User",
 	"fields": {
-		"username": "test",
+		"uid": 10000,
 		"shell": "/bin/sh",
 		"homedir": "/home/test",
 		"min": 0,

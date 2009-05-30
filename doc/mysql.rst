@@ -39,8 +39,8 @@ Tables de l'application nss
   les utilisateurs, au sens *nss*::
 
     CREATE TABLE "users" (
-            "uid" integer NOT NULL PRIMARY KEY,
-            "username" varchar(128) NOT NULL UNIQUE,
+            "username" varchar(128) NOT NULL PRIMARY KEY,
+            "uid" integer NOT NULL UNIQUE,
             "password" varchar(64) NOT NULL,
             "expire" integer NOT NULL,
             "gid" integer NOT NULL REFERENCES "groups" ("gid"),
@@ -85,7 +85,7 @@ Tables de l'application nss
 
     CREATE TABLE "grouplist" (
             "id" integer NOT NULL PRIMARY KEY,
-            "uid" integer NOT NULL REFERENCES "users" ("uid"),
+            "username" varchar(128) NOT NULL REFERENCES "users" ("username"),
             "gid" integer NOT NULL REFERENCES "groups" ("gid"),
             UNIQUE ("uid", "gid")
     );

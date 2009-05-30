@@ -1,3 +1,16 @@
+auf-django-users (0.5.3alpha) intrepid; urgency=low
+
+  * 0.5.3alpha, a.k.a. "ici vol DC 132" : version ALPHA à tester !
+  * oups oups oups... et aïe aïe aïe : modification du modèle donc 
+    du schéma de la base SQL :( Pince à épiler à sortir pour ceux qui sont
+    en prod (avec mes plus plates excuses) :
+      - username devient la clé de User
+      - uid devient un champ integer unique
+      - grouplist : association username-gid, et non plus uid-gid
+  * Merci à Shafeek pour son oeil de lynx sur ce coup là !!
+
+ -- Thomas NOEL <thomas@zepo.localnet>  Sat, 30 May 2009 02:13:58 +0000
+
 auf-django-users (0.5.2) unstable; urgency=low
 
   * debian/contrib: ajout d'un recommends python-mysqldb

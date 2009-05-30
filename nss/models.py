@@ -65,8 +65,8 @@ class User(models.Model):
     """
         Représentation d'un utilisateur au sens Unix (nss). Voici les champs disponibles :
 
-         * ``uid`` : numéro identifiant l'utilisateur. C'est la *clé primaire*
-         * ``username`` : nom de l'utilisateur, uniquement composé de lettres minuscules et de chiffres
+         * ``username`` : nom de l'utilisateur, uniquement composé de lettres minuscules et de chiffres. C'est la *clé primaire*
+         * ``uid`` : numéro identifiant l'utilisateur
          * ``password`` : mot de passe de l'utilisateur, crypté
          * ``expire`` : date d'expiration du compte. Il s'agit d'un objet *datetime.date*
          * ``gid`` : objet Group auquel appartient l'utilisateur
@@ -86,9 +86,9 @@ class User(models.Model):
 
     """
 
-    uid = models.AutoField("userID", primary_key=True) 
-    username = models.CharField("nom d'utilisateur", max_length=128, unique=True,
+    username = models.CharField("nom d'utilisateur", max_length=128, primary_key=True,
             help_text="Indiquez un identifiant de connexion, uniquement composé de lettres minuscules et de chiffres")
+    uid = models.IntegerField("userID", unique=True) 
     password = models.CharField("mot de passe (crypté)", max_length=64, default='x')
     expire = ExpireField("date d'expiration", default=default_expire)
     gid = models.ForeignKey("Group", db_column= "gid", default=DEFAULT_GID,
@@ -151,8 +151,9 @@ class User(models.Model):
         try:
             # si l'objet existe déjà, on récupère ses données actuelles
             current = User.objects.get(pk=self.pk) 
-            # on refuse de modifier username ou source
-            self.username = current.username
+            # on refuse de modifier l'uid ou la source, il y a trop
+            # d'implications par ailleurs
+            self.uid = current.uid
             self.source = current.source
         except:
             pass
@@ -211,15 +212,15 @@ class GroupList(models.Model):
     Association entre un *User* et un *Group* afin de connaître les groupes
     secondaires auxquels appartient un utilisateur donné.
     """
-    uid = models.ForeignKey(User, db_column="uid")
+    username = models.ForeignKey(User, db_column="username")
     gid = models.ForeignKey(Group, db_column="gid")
 
     def __unicode__(self):
-        return "%s dans %s" % (self.uid, self.gid)
+        return "%s dans %s" % (self.username, self.gid)
 
     class Meta:
         db_table = "grouplist"
         verbose_name = "appartenance groupe secondaire"
         verbose_name_plural = "appartenances groupes secondaires"
-        unique_together = ( "uid", "gid" )
+        unique_together = ( "username", "gid" )
 
