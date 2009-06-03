@@ -1,4 +1,4 @@
-auf-django-users (0.5.5) jaunty; urgency=low
+auf-django-users (0.5.5) unstable; urgency=low
 
   * nss/models.py: les champs sont ordonnés pour donner une table SQL
     la plus proche possible des champs passwd et shadow.
