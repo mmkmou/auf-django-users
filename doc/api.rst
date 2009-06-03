@@ -98,5 +98,5 @@ Créer 20 utilisateurs formation1,2,3... avec le même mot de passe : ::
   from aufusers import User
 
   for i in range(1,21):
-       User(username="formation%d" % %i, password="passer").save()
+       User(username="formation%d" % i, password="passer").save()
 
