@@ -54,8 +54,8 @@ class Group(models.Model):
 
     class Meta:
         db_table = "groups"
-        verbose_name = "groupe système"
-        verbose_name_plural = "groupes système"
+        verbose_name = "groupe système (NSS)"
+        verbose_name_plural = "groupes système (NSS)"
 
     def __unicode__(self):
         return "%s (%s)" % (self.name, self.gid)
@@ -65,8 +65,8 @@ class User(models.Model):
     """
         Représentation d'un utilisateur au sens Unix (nss). Voici les champs disponibles :
 
-         * ``username`` : nom de l'utilisateur, uniquement composé de lettres minuscules et de chiffres. C'est la *clé primaire*
          * ``uid`` : numéro identifiant l'utilisateur
+         * ``username`` : nom de l'utilisateur, uniquement composé de lettres minuscules et de chiffres. C'est la *clé primaire*
          * ``password`` : mot de passe de l'utilisateur, crypté
          * ``expire`` : date d'expiration du compte. Il s'agit d'un objet *datetime.date*
          * ``gid`` : objet Group auquel appartient l'utilisateur
@@ -86,9 +86,9 @@ class User(models.Model):
 
     """
 
+    uid = models.IntegerField("userID", unique=True) 
     username = models.CharField("nom d'utilisateur", max_length=128, primary_key=True,
             help_text="Indiquez un identifiant de connexion, uniquement composé de lettres minuscules et de chiffres")
-    uid = models.IntegerField("userID", unique=True) 
     password = models.CharField("mot de passe (crypté)", max_length=64, default='x')
     expire = ExpireField("date d'expiration", default=default_expire)
     gid = models.ForeignKey("Group", db_column= "gid", default=DEFAULT_GID,
@@ -179,8 +179,8 @@ class User(models.Model):
 
     class Meta:
         db_table = "users"
-        verbose_name = "utilisateur système"
-        verbose_name_plural = "utilisateurs système"
+        verbose_name = "utilisateur système (NSS)"
+        verbose_name_plural = "utilisateurs système (NSS)"
         get_latest_by = 'uid'
 
     def active(self):
