@@ -13,10 +13,17 @@ Un passage à la version 0.5.4 nécessite les modifications suivantes :
       ALTER TABLE users MODIFY uid int(11) NOT NULL UNIQUE;
       ALTER TABLE users DROP PRIMARY KEY, ADD PRIMARY KEY(username);
 
-   Table grouplist : on ajoute un champ "username", on en remplit les valeurs puis on ajoute une contrainte de clé distante, et on supprime le champ uid devenu inutile
+   Table grouplist : on ajoute un champ "username", on en remplit les valeurs.
+   On ajoute les contraintes, on supprime les anciennes, et on supprime le champ
+   uid devenu inutile. Ouf.
+
       ALTER TABLE grouplist ADD username varchar(128) NOT NULL;
       UPDATE grouplist SET username = (SELECT users.username FROM users WHERE users.uid = grouplist.uid );
-      ALTER TABLE `grouplist` ADD CONSTRAINT username_refs_username_5efc4794 FOREIGN KEY (`username`) REFERENCES `users` (`username`);
+      ALTER TABLE grouplist ADD CONSTRAINT username_refs_username_5efc4794 FOREIGN KEY (`username`) REFERENCES `users` (`username`);
+      ALTER TABLE grouplist ADD UNIQUE KEY `username` (`username`,`gid`);
+      ALTER TABLE grouplist ADD KEY `grouplist_username` (`username`);
+      ALTER TABLE grouplist DROP KEY grouplist_uid;
+      ALTER TABLE grouplist DROP KEY uid;
       ALTER TABLE grouplist DROP uid;
 
 4. Relancer l'interface web et tester si tout roule...
