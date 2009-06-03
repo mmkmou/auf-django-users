@@ -1,3 +1,17 @@
+auf-django-users (0.5.5) jaunty; urgency=low
+
+  * nss/models.py: les champs sont ordonnés pour donner une table SQL
+    la plus proche possible des champs passwd et shadow.
+  * doc/mysql.rst: description complète des tables
+  * nss/models.py Group: ajout d'un attribut Group.users_secgroup (autre façon
+    de voir la liaison entre un utilisateur et ses groupes secondaires) et
+    d'une méthode users() qui renvoie la liste des utilisateurs d'un group
+    (que le groupe leur soit primaire ou secondaire)
+  * nss/models.py User: l'attribut groups est renommé secgroups. Une méthode
+    groups() renvoie une liste de tous les groupes de l'utilisateur.
+
+ -- Thomas NOEL <thomas.noel@auf.org>  Wed, 03 Jun 2009 17:47:51 +0000
+
 auf-django-users (0.5.4) unstable; urgency=low
 
   * validation de la modif précédente : ça marche. Ajout d'un README.0.5.4 qui

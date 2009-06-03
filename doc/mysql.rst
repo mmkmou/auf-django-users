@@ -25,8 +25,8 @@ Si l'application était déjà fonctionnement via un serveur (Apache/WSGI ou
 restart`` pour Apache, ou en relançant un autre ``runserver``).
 
 
-Tables de la base
------------------
+Description des tables de la base
+---------------------------------
 
 Si vous n'avez pas du tout de base de donnée MySQL pour ``libnss-mysql-bg``,
 alors Django les créera pour vous (voir plus loin). Sinon, il faut adapter vos
@@ -35,27 +35,31 @@ tables pour qu'elles suivent les schémas ci-dessous.
 Tables de l'application nss
 ```````````````````````````
 
+Rappel: ces schémas ne sont utiles que si vous devez *adapter des tables déjà
+existantes*. Si vous n'avez pas encore de base de donnée d'authentification, ne
+faites rien : ``auf-django-users`` va les créer pour vous.
+
 **users**
   les utilisateurs, au sens *nss*::
 
-    CREATE TABLE "users" (
-            "username" varchar(128) NOT NULL PRIMARY KEY,
-            "uid" integer NOT NULL UNIQUE,
-            "password" varchar(64) NOT NULL,
-            "expire" integer NOT NULL,
-            "gid" integer NOT NULL REFERENCES "groups" ("gid"),
-            "gecos" varchar(128) NOT NULL,
-            "homedir" varchar(256) NOT NULL UNIQUE,
-            "shell" varchar(64) NOT NULL,
-            "lstchg" integer NOT NULL,
-            "min" integer NOT NULL,
-            "warn" integer NOT NULL,
-            "max" integer NOT NULL,
-            "inact" integer NOT NULL,
-            "flag" integer NOT NULL,
-            "source" varchar(10) NOT NULL,
-            "creation" datetime NOT NULL,
-            "modification" datetime NOT NULL
+    CREATE TABLE `users` (
+        `username` varchar(128) NOT NULL PRIMARY KEY,
+        `password` varchar(64) NOT NULL,
+        `uid` integer NOT NULL UNIQUE,
+        `gid` integer NOT NULL,
+        `gecos` varchar(128) NOT NULL,
+        `homedir` varchar(256) NOT NULL UNIQUE,
+        `shell` varchar(64) NOT NULL,
+        `lstchg` integer NOT NULL,
+        `min` integer NOT NULL,
+        `warn` integer NOT NULL,
+        `max` integer NOT NULL,
+        `inact` integer NOT NULL,
+        `expire` integer NOT NULL,
+        `flag` integer NOT NULL,
+        `source` varchar(10) NOT NULL,
+        `creation` datetime NOT NULL,
+        `modification` datetime NOT NULL
     );
 
   Notes :
@@ -71,11 +75,15 @@ Tables de l'application nss
 **groups**
   les groupes d'utilisateurs::
 
-    CREATE TABLE "groups" (
-            "gid" integer NOT NULL PRIMARY KEY,
-            "name" varchar(32) NOT NULL UNIQUE,
-            "password" varchar(64) NOT NULL
+    CREATE TABLE `groups` (
+        `name` varchar(32) NOT NULL UNIQUE,
+        `password` varchar(64) NOT NULL,
+        `gid` integer AUTO_INCREMENT NOT NULL PRIMARY KEY
     );
+
+  et on ajoute une contrainte qui lie les groupes des utilisateurs à ces groupes (une clé distante de ``users.gid`` vers ``groups.gid``). Ceci est facultatif, mais ça peut éviter d'avoir un jour une base de donnée incohérente::
+
+    ALTER TABLE `users` ADD CONSTRAINT gid_refs_gid_60c371b8 FOREIGN KEY (`gid`) REFERENCES `groups` (`gid`);
 
   Notes :
    * le champ ``password`` est en général fixé à ``'x'``
@@ -83,12 +91,18 @@ Tables de l'application nss
 **grouplist**
   appartenance des utilisateurs à leurs groupes secondaires::
 
-    CREATE TABLE "grouplist" (
-            "id" integer NOT NULL PRIMARY KEY,
-            "username" varchar(128) NOT NULL REFERENCES "users" ("username"),
-            "gid" integer NOT NULL REFERENCES "groups" ("gid"),
-            UNIQUE ("uid", "gid")
+    CREATE TABLE `grouplist` (
+        `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
+        `gid` integer NOT NULL,
+        `username` varchar(128) NOT NULL,
+        UNIQUE (`gid`, `username`)
     );
+
+  et on ajoute des contraintes (clés distantes) qui relient les ``username`` à des utilisateurs et les ``gid`` à des groupes. Ce n'est pas indispensable, mais ça peut éviter d'avoir un jour une base de donnée incohérente::
+
+    ALTER TABLE `grouplist` ADD CONSTRAINT gid_refs_gid_6d7c9cff FOREIGN KEY (`gid`) REFERENCES `groups` (`gid`);
+    ALTER TABLE `grouplist` ADD CONSTRAINT username_refs_username_5efc4794 FOREIGN KEY (`username`) REFERENCES `users` (`username`);
+
 
 Tables Django
 `````````````
@@ -108,9 +122,11 @@ Création d'une base (à partir de rien)
 Si vous n'avez pas encore de base MySQL de gestion de vos utilisateurs,
 l'application ``auf-django-users-manage.py`` vous permet de la créer facilement : 
 
- #. Créez une base ``auth`` sur votre serveur MySQL. Attention à ce que cette base utilise bien l'encodage **utf8** !
+ #. Créez une base ``auth`` sur votre serveur MySQL : ::
 
-    .. TODO ajouter la commande complete ici
+    > SET character_set_client = utf8;
+    > SET NAMES utf8;
+    > CREATE DATABASE auth DEFAULT CHARACTER SET utf8;
 
  #. Créez 4 utilisateurs associés à cette base :
 
@@ -127,7 +143,7 @@ l'application ``auf-django-users-manage.py`` vous permet de la créer facilement
     
     $ auf-django-users-manage.py syncdb
 
- #. Vous pouvez alor sajouter un utilisateur et un groupe initial dans la base : ::
+ #. Vous pouvez alors ajouter un utilisateur et un groupe initial dans la base : ::
 
     $ auf-django-users-manage.py loaddata utilisateur_test
 

@@ -69,21 +69,23 @@ Modifier le mot de passe de l'utilisateur *test* : ::
 
   u = User.objects.get(username='test')
   u.password = 'passer'
-  u.save()   # le mot de passe sera bien crypté
+  u.save()   # le mot de passe sera crypté à ce moment là
 
-Afficher toutes les dates d'expiration de tous les comptes : ::
+Afficher une liste de tous les comptes, avec dates d'expiration et groupes : ::
 
   from aufusers import User
 
   for u in User.objects.all():
-      print '%s = %s' % (u.username, u.gecos)
-      print '  appartient au groupe ' % (u.gid.name)
-      print '  et aux groupes ' + ', '.join([g.name for g in u.groups.all()])
+      print 'Compte %s (%s)' % (u.username, u.gecos)
+      print '            expire le : %s' % u.expire
+      print '     groupe principal : %s' % u.gid.name
+      print '  groupes secondaires : ' + ', '.join([g.name for g in u.secgroups.all()])
+      print '-'*40
 
 Compter le nombre d'utilisateurs actifs (date d'expiration dans le futur) : ::
 
-  import datetime
   from aufusers import User
+  import datetime
 
   print "nombre d'utilisateur actifs = %d" % \
         User.objects.filter(expire__gte=datetime.date.today()).count()
@@ -91,4 +93,10 @@ Compter le nombre d'utilisateurs actifs (date d'expiration dans le futur) : ::
         # note 2 : avec la puissance de ses QuerySet, sachez que Django ne fait
         # qu'une seule requete SQL pour l'instruction ci dessus... si, si !
 
+Créer 20 utilisateurs formation1,2,3... avec le même mot de passe : ::
+
+  from aufusers import User
+
+  for i in range(1,21):
+       User(username="formation%d" % %i, password="passer").save()
 

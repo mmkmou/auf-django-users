@@ -47,10 +47,12 @@ class Group(models.Model):
      * ``name`` : nom du groupe, uniquement composé de lettres minuscules et de chiffres
      * ``password`` : mot de passe du groupe, en général pas utilisé et donc positionné à 'x'
     """
-    gid = models.AutoField("groupID", primary_key=True) 
     name = models.CharField("nom du groupe", max_length=32, unique=True,
             help_text="Indiquez un identifiant de groupe, uniquement composé de lettres minuscules et de chiffres")
     password = models.CharField("mot de passe (crypté)", max_length=64, default='x', editable=False)
+    gid = models.AutoField("groupID", primary_key=True) 
+    # utilisateurs qui ont ce groupe en secondaire
+    users_secgroup = models.ManyToManyField("User", related_name='users_secgroup', through='GroupList', blank=True)
 
     class Meta:
         db_table = "groups"
@@ -60,25 +62,37 @@ class Group(models.Model):
     def __unicode__(self):
         return "%s (%s)" % (self.name, self.gid)
 
+    def users(self):
+        """
+        Retourne la liste des utilisateurs compris dans ce groupe,
+        que ce groupe soit leur groupe primaire ou secondaire.
+        """
+        users=[]
+        for user in self.user_set.all():
+            users.append(user)
+        for user in self.users_secgroup.all():
+            users.append(user)
+        return users
+
 
 class User(models.Model):
     """
         Représentation d'un utilisateur au sens Unix (nss). Voici les champs disponibles :
 
-         * ``uid`` : numéro identifiant l'utilisateur
          * ``username`` : nom de l'utilisateur, uniquement composé de lettres minuscules et de chiffres. C'est la *clé primaire*
          * ``password`` : mot de passe de l'utilisateur, crypté
-         * ``expire`` : date d'expiration du compte. Il s'agit d'un objet *datetime.date*
+         * ``uid`` : numéro identifiant l'utilisateur
          * ``gid`` : objet Group auquel appartient l'utilisateur
+         * ``secgroups`` : liste des groupes secondaires auquel appartient l'utilisateur (c'est un *ManyRelatedManager*)
          * ``gecos`` : nom et prénom, sous la forme Prenom NOM (sans aucun accent)
          * ``homedir`` : répertoire personnel ($HOME)
          * ``shell`` : interpréteur de commande
-         * ``groups`` : liste des groupes secondaires auquel appartient l'utilisateur (c'est un *ManyRelatedManager*)
          * ``lstchg`` : date du dernier changement du mot de passe (*datetime.date*)
          * ``min`` : nombre de jours à attendre avant de pouvoir changer le mot de passe
          * ``warn`` : nombre de jours d'avertissement avant la fin mot de passe
          * ``max`` : nombre de jours après lesquels le mot de passe doit être changé
          * ``inact`` : nombre de jours après la fin de validité provoquant la désactivation du compte
+         * ``expire`` : date d'expiration du compte. Il s'agit d'un objet *datetime.date*
          * ``flag`` : champ réservé
          * ``source`` : source des données de cet utilisateur (== 'LOCAL' si l'utilisateur est géré par l'application)
          * ``creation`` : date de création de l'utilisateur dans la base de donnée
@@ -86,13 +100,13 @@ class User(models.Model):
 
     """
 
-    uid = models.IntegerField("userID", unique=True) 
     username = models.CharField("nom d'utilisateur", max_length=128, primary_key=True,
             help_text="Indiquez un identifiant de connexion, uniquement composé de lettres minuscules et de chiffres")
     password = models.CharField("mot de passe (crypté)", max_length=64, default='x')
-    expire = ExpireField("date d'expiration", default=default_expire)
+    uid = models.IntegerField("userID", unique=True) 
     gid = models.ForeignKey("Group", db_column= "gid", default=DEFAULT_GID,
             help_text="Ne modifiez que si vous savez exactement ce que vous faîtes !")
+    secgroups = models.ManyToManyField("Group", related_name='groups', through='GroupList', blank=True)
     gecos = models.CharField("informations GECOS", max_length=128, blank=True,
             help_text="Indiquez le nom et le prénom, sous la forme Prenom NOM (sans aucun accent)")
     homedir = models.CharField("répertoire personnel (home)", max_length=256,
@@ -100,8 +114,7 @@ class User(models.Model):
             help_text="Laissez à <em>" + HOME_BASE + "</em> et la valeur sera calculée automatiquement")
     shell = models.CharField("interpréteur de commande (shell)", max_length=64, 
             choices=SHELLS, default=SHELLS[0][0], blank=False)
-    groups = models.ManyToManyField("Group", related_name='groups', through='GroupList', blank=True)
-    # informations shadow (non utilisées pour l'instant)
+    # informations shadow (pour expire ; les autres ne sont pas utilisées pour l'instant)
     lstchg = ExpireField("dernier changement du mot de passe", default = 1,
             help_text="date du dernier changement de mot de passe")
     min = models.IntegerField("durée minimale du mot de passe", default = 0,
@@ -112,6 +125,7 @@ class User(models.Model):
             help_text="nombre de jours après lesquels le mot de passe doit être changé")
     inact = models.IntegerField("", default = 0,
             help_text="nombre de jours après la fin de validité provoquant la désactivation du compte")
+    expire = ExpireField("date d'expiration", default=default_expire)
     flag = models.IntegerField("réservé", default = 0)
     # champs spécifiques "auf" : source de provenance des données et dates automatiques
     source = models.CharField("source", max_length=10, default="LOCAL")
@@ -206,14 +220,23 @@ class User(models.Model):
     colored_expire.allow_tags = True
     colored_expire.admin_order_field = 'expire'
 
+    def groups(self):
+        """
+        Retourne la liste de tous les groupes auquel appartient
+        un utilisateur (groupe principal et groupes secondaires)
+        """
+        groups=[self.gid]
+        groups.extend(self.secgroups.all())
+        return groups
+
 
 class GroupList(models.Model):
     """
     Association entre un *User* et un *Group* afin de connaître les groupes
     secondaires auxquels appartient un utilisateur donné.
     """
-    username = models.ForeignKey(User, db_column="username")
     gid = models.ForeignKey(Group, db_column="gid")
+    username = models.ForeignKey(User, db_column="username")
 
     def __unicode__(self):
         return "%s dans %s" % (self.username, self.gid)
@@ -222,5 +245,5 @@ class GroupList(models.Model):
         db_table = "grouplist"
         verbose_name = "appartenance groupe secondaire"
         verbose_name_plural = "appartenances groupes secondaires"
-        unique_together = ( "username", "gid" )
+        unique_together = ( "gid", "username" )
 
