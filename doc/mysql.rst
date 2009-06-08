@@ -1,7 +1,7 @@
 Utilisation d'une base MySQL
 ============================
 
-.. Warning:: **Réglages préliminaires côté MySQL**
+.. Warning:: **Réglages préliminaires sur le serveur MySQL**
 
    Afin d'éviter les soucis (avec cette application comme avec beaucoup
    d'autre), votre serveur MySQL doit être configuré pour supporter l'encodage
@@ -20,9 +20,73 @@ Les paramètres de connexion à la base doivent être indiqués dans ``/etc/auf-
   DATABASE_HOST = '219.87.23.11'    # laisser vide si la base est local (localhost)
   DATABASE_PORT = ''                # laisser vide pour le port MySQL par défaut
 
-Si l'application était déjà fonctionnement via un serveur (Apache/WSGI ou
-``runserver``), il faut relancer complétement le serveur (avec ``# apache2ctl
-restart`` pour Apache, ou en relançant un autre ``runserver``).
+Si vous n'avez pas encore de base de données MySQL, indiquez ici les futurs
+paramètres de connexion : l'application va s'en servir pour vous aider à créer
+les tables.
+
+Création d'une base (à partir de rien)
+--------------------------------------
+
+Si vous n'avez pas encore de base MySQL de gestion de vos utilisateurs,
+l'application ``auf-django-users-manage.py`` vous permet de la créer facilement : 
+
+ #. Créez une base ``auth`` sur votre serveur MySQL : ::
+
+    > SET character_set_client = utf8;
+    > SET NAMES utf8;
+    > CREATE DATABASE auth DEFAULT CHARACTER SET utf8;
+
+ #. Créez 4 utilisateurs associés à cette base :
+
+    - ``nsscreate`` : tous les droits sur la base
+    - ``nssadmin`` : droits SELECT, INSERT, UPDATE et DELETE
+    - ``nssread`` : droits SELECT partout *sauf sur les champs password*
+    - ``nssreads`` : droits SELECT partout
+
+    .. TODO ajouter les commandes correspondantes
+
+ #. Dans ``/etc/auf-django-users/conf.py``, indiquez l'utilisateur ``nsscreate`` (celui qui a tous les droits sur la base)
+
+ #. Lancer la création des tables : ::
+    
+    $ auf-django-users-manage.py syncdb
+
+ #. Dans ``/etc/auf-django-users/conf.py``, changez l'utilisateur pour
+    ``nssadmin`` (qui n'a pas les droits de modification de la structure des
+    tables)
+
+ #. Si votre application est hébergée en WSGI sur Apache, n'oubliez pas de
+    relancer ce dernier : ::
+
+    # apache2ctl restart
+
+ #. Si vous le souhaitez, vous pouvez alors ajouter un groupe et un utilisateur
+    initiaux dans la base : ::
+
+    $ auf-django-users-manage.py loaddata group_users
+    $ auf-django-users-manage.py loaddata user_test
+
+
+
+Utilisation d'une base déjà existante
+-------------------------------------
+
+ #. Adaptatez vos tables existantes (par exemple avec ``ALTER TABLE``) afin de
+    les rendre conformes aux modèles indiqués ci-dessous.
+
+ #. Lancer ``$ auf-django-users-manage.py syncdb`` pour ajouter les tables
+    manquantes, notamment les tables internes Django.
+
+.. Note:: **si la base de donnée MySQL n'était pas en utf8**, il faut absolument
+   convertir les tables internes Django **juste après le syncdb** : ::
+
+     ALTER TABLE auth_permission CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci;
+     ALTER TABLE auth_group CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci;
+     ALTER TABLE auth_user CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci;
+     ALTER TABLE auth_message CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci;
+     ALTER TABLE django_content_type CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci;
+     ALTER TABLE django_session CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci;
+     ALTER TABLE django_admin_log CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci;
 
 
 Description des tables de la base
@@ -37,7 +101,7 @@ Tables de l'application nss
 
 Rappel: ces schémas ne sont utiles que si vous devez *adapter des tables déjà
 existantes*. Si vous n'avez pas encore de base de donnée d'authentification, ne
-faites rien : ``auf-django-users`` va les créer pour vous.
+faites rien : ``auf-django-users`` va les créer pour vous (voir ci-dessus).
 
 **users**
   les utilisateurs, au sens *nss*::
@@ -104,75 +168,14 @@ faites rien : ``auf-django-users`` va les créer pour vous.
     ALTER TABLE `grouplist` ADD CONSTRAINT username_refs_username_5efc4794 FOREIGN KEY (`username`) REFERENCES `users` (`username`);
 
 
-Tables Django
-`````````````
+Tables internes Django
+``````````````````````
 
-Le système Django va créer ses propres tables afin de gérer les droits des
-utilisateurs de l'application, ainsi que tout ce qui concerne la gestion de
-l'interface Web. Il n'est pas nécessaire que ses tables existent : Django les
-crééra si besoin. 
+Le système Django possède ses propres tables, afin de gérer notamment les
+droits d'accès aux différentes possibilités de l'application. Vous n'avez pas à
+créer ses tables : c'est Django qui les construit lors du ``syncdb``, si
+besoin. Ces tables sont :
 
  * pour l'authentification : ``auth_permission``, ``auth_group``, ``auth_user``, ``auth_message``
  * pour la partie web : ``django_content_type``, ``django_session``, ``django_admin_log``
-
-
-Création d'une base (à partir de rien)
---------------------------------------
-
-Si vous n'avez pas encore de base MySQL de gestion de vos utilisateurs,
-l'application ``auf-django-users-manage.py`` vous permet de la créer facilement : 
-
- #. Créez une base ``auth`` sur votre serveur MySQL : ::
-
-    > SET character_set_client = utf8;
-    > SET NAMES utf8;
-    > CREATE DATABASE auth DEFAULT CHARACTER SET utf8;
-
- #. Créez 4 utilisateurs associés à cette base :
-
-    - ``nsscreate`` : tous les droits sur la base
-    - ``nssadmin`` : droits SELECT, INSERT, UPDATE et DELETE
-    - ``nssread`` : droits SELECT partout *sauf sur les champs password*
-    - ``nssreads`` : droits SELECT partout
-
-    .. TODO ajouter les commandes correspondantes
-
- #. Dans ``/etc/auf-django-users/conf.py``, indiquez l'utilisateur ``nsscreate`` (celui qui a tous les droits sur la base)
-
- #. Lancer la création des tables : ::
-    
-    $ auf-django-users-manage.py syncdb
-
- #. Vous pouvez alors ajouter un groupe et un utilisateur initiaux dans la base : ::
-
-    $ auf-django-users-manage.py loaddata group_users
-    $ auf-django-users-manage.py loaddata user_test
-
- #. Dans ``/etc/auf-django-users/conf.py``, changez l'utilisateur pour
-    ``nssadmin`` (qui n'a pas les droits de modification de la structure des
-    tables)
-
- #. Si votre application est hébergée en WSGI sur Apache, n'oubliez pas de
-    relancer ce dernier : ::
-
-    # apache2ctl restart
-
-
-Utilisation d'une base déjà existante
--------------------------------------
-
- #. Adaptatez vos tables (notamment avec ``ALTER TABLE``) afin de les rendre conformes aux modèles indiqués ci-dessus
-
- #. Lancer ``$ auf-django-users-manage.py syncdb`` pour ajouter les tables manquantes (notamment celles de Django)
-
-.. Note:: **si la base de donnée MySQL n'était pas en utf8**, il faut absolument
-   convertir les tables Django **juste après le syncdb** : ::
-
-     ALTER TABLE auth_permission CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci;
-     ALTER TABLE auth_group CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci;
-     ALTER TABLE auth_user CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci;
-     ALTER TABLE auth_message CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci;
-     ALTER TABLE django_content_type CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci;
-     ALTER TABLE django_session CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci;
-     ALTER TABLE django_admin_log CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci;
 

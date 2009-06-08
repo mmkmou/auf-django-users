@@ -1,5 +1,5 @@
-Mise en ligne avec Apache & WSGI
-================================
+Mise en ligne avec Apache et WSGI
+=================================
 
 Pour mettre en ligne le système de façon permanente, la technique conseillée
 est d'utiliser un serveur compatible WSGI. ``apache2`` et son module

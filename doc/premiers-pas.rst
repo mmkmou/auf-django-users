@@ -40,7 +40,8 @@ donner un *login* et un mot de passe : ::
   (...)
 
 Une fois cette initialisation effectuée, vous pouvez créer un groupe et un
-utilisateurs initiaux pour vos tests : ::
+utilisateurs initiaux pour vos tests. Ces données sont déjà fournies avec
+l'application, il vous suffit de les injecter dans la base : ::
 
   $ auf-django-users-manage.py loaddata group_users
   $ auf-django-users-manage.py loaddata user_test

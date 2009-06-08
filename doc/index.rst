@@ -12,8 +12,10 @@ Le système auf-django-users est un projet Django qui propose :
 .. image:: auf-django-users.*
 
 Cette documentation décrit l'application et explique comment mettre en
-production le système : mise en ligne via le serveur Web Apache2 et connexion à
-une base de donnée MySQL.
+production le système. Lisez-la complétement, elle ne contient pas beaucoup
+de choses inutiles.
+ 
+-----
 
 .. toctree::
    :maxdepth: 2
@@ -21,6 +23,7 @@ une base de donnée MySQL.
    premiers-pas
    mysql
    wsgi
+   acces
    api
    contrib
 
