@@ -33,10 +33,13 @@ SHELLS = (
 # par la formule suivante : HOMEBASE + '/' + username
 HOME_BASE = "/home"
 
-# UID minimale
+# UID minimal pour un utilisateur
 MIN_UID = 10000
 
-# GID par défaut
+# GID minimal pour un groupe
+MIN_GID = 10000
+
+# GID par défaut pour un utilisateur ("users")
 DEFAULT_GID = 100
 
 # Pour proposer son propre calcul du homedir, il suffit de créer une fonction
@@ -54,14 +57,10 @@ DEFAULT_GID = 100
 #    """renvoie la date actuelle..."""
 #    return datetime.date.today()
 
+
 #
-# Plugins locaux dans /usr/lib/auf-django-users/contrib
+# Activation des contribs (plug-ins situés dans /usr/lib/auf-django-users/contrib)
 #
-# Exemple :
-# INSTALLED_APPS_MORE = (
-#   'aufusers.contrib.logs',
-#   'aufusers.contrib.sync_mail_base_externe',
-# )
 INSTALLED_APPS_MORE = (
     'aufusers.contrib.log',
     # 'aufusers.contrib.log_expire',

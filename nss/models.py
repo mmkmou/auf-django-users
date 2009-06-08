@@ -16,7 +16,7 @@ from aufusers.lib.utils import password_crypt
 import datetime
 
 # import de la configuration
-from aufusers.conf import SHELLS, HOME_BASE, MIN_UID, DEFAULT_GID
+from aufusers.conf import SHELLS, HOME_BASE, MIN_UID, MIN_GID, DEFAULT_GID
 
 # importe la fonction homedir() depuis la conf si elle existe,
 # sinon on crée une fonction homedir() par défaut
@@ -31,48 +31,13 @@ try:
     from aufusers.conf import default_expire
 except:
     def default_expire(): 
-	# fin du mois actuel (j'ai pas mieux comme algo, j'ai peu de neurone)
+	    # retourne la date de fin du mois actuel (j'ai pas mieux comme algo, j'ai peu de neurone)
         # on se place au debut du mois actuel, on va 32 plus tard,
         # on prend le premier jour du mois obtenu... et on recule d'un jour. Ouf.
         return ( datetime.date.today().replace(day=1) + \
                  datetime.timedelta(32) ).replace(day=1) - datetime.timedelta(1)
 
 # fin de l'import de la configuration
-
-class Group(models.Model):
-    """
-    Représentation d'un groupe au sens Unix (nss):
-
-     * ``gid`` : numéro identifiant le groupe
-     * ``name`` : nom du groupe, uniquement composé de lettres minuscules et de chiffres
-     * ``password`` : mot de passe du groupe, en général pas utilisé et donc positionné à 'x'
-    """
-    name = models.CharField("nom du groupe", max_length=32, unique=True,
-            help_text="Indiquez un identifiant de groupe, uniquement composé de lettres minuscules et de chiffres")
-    password = models.CharField("mot de passe (crypté)", max_length=64, default='x', editable=False)
-    gid = models.AutoField("groupID", primary_key=True) 
-    # utilisateurs qui ont ce groupe en secondaire
-    users_secgroup = models.ManyToManyField("User", related_name='users_secgroup', through='GroupList', blank=True)
-
-    class Meta:
-        db_table = "groups"
-        verbose_name = "groupe système (NSS)"
-        verbose_name_plural = "groupes système (NSS)"
-
-    def __unicode__(self):
-        return "%s (%s)" % (self.name, self.gid)
-
-    def users(self):
-        """
-        Retourne la liste des utilisateurs compris dans ce groupe,
-        que ce groupe soit leur groupe primaire ou secondaire.
-        """
-        users=[]
-        for user in self.user_set.all():
-            users.append(user)
-        for user in self.users_secgroup.all():
-            users.append(user)
-        return users
 
 
 class User(models.Model):
@@ -132,13 +97,19 @@ class User(models.Model):
     creation = models.DateTimeField("date de création", auto_now_add=True)
     modification = models.DateTimeField("dernière modification", auto_now=True)
 
-
     def __unicode__(self):
+        """Représentation d'un utilisateur : son login suivi de son uid"""
         return "%s (%s)" % (self.username, self.uid)
+
+    class Meta:
+        db_table = "users"
+        verbose_name = "utilisateur système (NSS)"
+        verbose_name_plural = "utilisateurs système (NSS)"
+        get_latest_by = 'uid'
 
     def save(self, force_insert=False, force_update=False, force_source=False):
         """
-        Enregistre ou modifie un utilisateur dans la base de données ``users``.
+        Enregistre ou modifie un utilisateur dans la table ``users``.
 
         La methode User.save() effectue quelques vérifications et modification
         avant de procéder à l'enregistrement réel de l'utilisateur dans la base
@@ -176,8 +147,8 @@ class User(models.Model):
         # l'appel)
         if self.source != "LOCAL" and not force_source:
             return
-        # si l'objet n'a pas d'UID proposée, on en calcule une,
-        # en sachant qu'elle doit être plus grande que MIN_UID
+        # si l'objet n'a pas d'UID proposé, on en calcule un,
+        # en sachant qu'il doit être plus grand que MIN_UID
         if self.uid == None:
             try:
                 self.uid = max(User.objects.latest().uid + 1, MIN_UID)
@@ -190,12 +161,6 @@ class User(models.Model):
         self.password = password_crypt( self.password )
         # et on lance l'enregistrement via la méthode mère
         return super(User, self).save(force_insert, force_update)
-
-    class Meta:
-        db_table = "users"
-        verbose_name = "utilisateur système (NSS)"
-        verbose_name_plural = "utilisateurs système (NSS)"
-        get_latest_by = 'uid'
 
     def active(self):
         return self.expire >= datetime.date.today()
@@ -228,6 +193,64 @@ class User(models.Model):
         groups=[self.gid]
         groups.extend(self.secgroups.all())
         return groups
+
+
+class Group(models.Model):
+    """
+    Représentation d'un groupe au sens Unix (nss):
+
+     * ``gid`` : numéro identifiant le groupe
+     * ``name`` : nom du groupe, uniquement composé de lettres minuscules et de chiffres
+     * ``password`` : mot de passe du groupe, en général pas utilisé et donc positionné à 'x'
+    """
+    name = models.CharField("nom du groupe", max_length=32, unique=True,
+            help_text="Indiquez un identifiant de groupe, uniquement composé de lettres minuscules et de chiffres")
+    password = models.CharField("mot de passe (crypté)", max_length=64, default='x', editable=False)
+    gid = models.AutoField("groupID", primary_key=True) 
+    # utilisateurs qui ont ce groupe en secondaire
+    users_secgroup = models.ManyToManyField("User", related_name='users_secgroup', through='GroupList', blank=True)
+
+    def __unicode__(self):
+        """Représentation d'un groupe : son nom suivi de son gid"""
+        return "%s (%s)" % (self.name, self.gid)
+
+    class Meta:
+        db_table = "groups"
+        verbose_name = "groupe système (NSS)"
+        verbose_name_plural = "groupes système (NSS)"
+        get_latest_by = 'gid'
+
+    def save(self, force_insert=False, force_update=False):
+        """
+        Enregistre ou modifie un groupe dans la table ``groups``.
+
+        Si aucun gid n'est proposé, la methode Group.save() en calcule un
+        avant de procéder à l'enregistrement réel du groupe dans la base.
+        """
+        # si l'objet n'a pas de GID proposé, on en calcule un,
+        # en sachant qu'il doit être plus grande que MIN_GID
+        if self.gid == None:
+            try:
+                self.gid = max(Group.objects.latest().gid + 1, MIN_GID)
+            except:
+                self.gid = MIN_GID
+        # on crypte le mot de passe (si besoin)
+        self.password = password_crypt( self.password )
+        # et on enregistre l'objet "pour de vrai"
+        return super(Group, self).save(force_insert, force_update)
+
+
+    def users(self):
+        """
+        Retourne la liste des utilisateurs compris dans ce groupe,
+        que ce groupe soit leur groupe primaire ou secondaire.
+        """
+        users=[]
+        for user in self.user_set.all():
+            users.append(user)
+        for user in self.users_secgroup.all():
+            users.append(user)
+        return users
 
 
 class GroupList(models.Model):

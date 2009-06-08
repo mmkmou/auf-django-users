@@ -143,9 +143,10 @@ l'application ``auf-django-users-manage.py`` vous permet de la créer facilement
     
     $ auf-django-users-manage.py syncdb
 
- #. Vous pouvez alors ajouter un utilisateur et un groupe initial dans la base : ::
+ #. Vous pouvez alors ajouter un groupe et un utilisateur initiaux dans la base : ::
 
-    $ auf-django-users-manage.py loaddata utilisateur_test
+    $ auf-django-users-manage.py loaddata group_users
+    $ auf-django-users-manage.py loaddata user_test
 
  #. Dans ``/etc/auf-django-users/conf.py``, changez l'utilisateur pour
     ``nssadmin`` (qui n'a pas les droits de modification de la structure des

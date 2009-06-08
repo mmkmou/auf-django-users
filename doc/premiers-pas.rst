@@ -39,10 +39,11 @@ donner un *login* et un mot de passe : ::
   Superuser created successfully.
   (...)
 
-Une fois cette initialisation effectuée, vous pouvez créer un utilisateur et un
-groupe initiaux pour vos tests : ::
+Une fois cette initialisation effectuée, vous pouvez créer un groupe et un
+utilisateurs initiaux pour vos tests : ::
 
-  $ auf-django-users-manage.py loaddata utilisateur_test
+  $ auf-django-users-manage.py loaddata group_users
+  $ auf-django-users-manage.py loaddata user_test
 
 Lancement du serveur Web de test
 --------------------------------

@@ -1,0 +1,7 @@
+[
+    {
+        "pk": 100,
+        "model": "nss.Group",
+        "fields": { "password": "x", "name": "users" }
+    }
+]
