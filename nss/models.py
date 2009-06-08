@@ -15,29 +15,43 @@ from aufusers.lib.expire import ExpireField
 from aufusers.lib.utils import password_crypt
 import datetime
 
-# import de la configuration
-from aufusers.conf import SHELLS, HOME_BASE, MIN_UID, MIN_GID, DEFAULT_GID
 
-# importe la fonction homedir() depuis la conf si elle existe,
-# sinon on crée une fonction homedir() par défaut
-try:
-    from aufusers.conf import homedir
-except:
-    def homedir(user):
-        return "%s/%s" % (HOME_BASE, user.username)
+# configurations par défault (peuvent être redéfinies dans le conf.py)
 
-# même chose pour le calcul du champ expire par défaut
-try:
-    from aufusers.conf import default_expire
-except:
-    def default_expire(): 
-	    # retourne la date de fin du mois actuel (j'ai pas mieux comme algo, j'ai peu de neurone)
-        # on se place au debut du mois actuel, on va 32 plus tard,
-        # on prend le premier jour du mois obtenu... et on recule d'un jour. Ouf.
-        return ( datetime.date.today().replace(day=1) + \
-                 datetime.timedelta(32) ).replace(day=1) - datetime.timedelta(1)
+# Shells de connexion acceptés , le premier est la valeur par défaut
+SHELLS = (
+    ('/bin/false', 'Désactivé (/bin/false)'),
+    ('/bin/sh', 'Par défaut (/bin/sh)'),
+)
 
-# fin de l'import de la configuration
+# Valeur du "home" par défaut dans le formulaire. Si cette valeur n'est pas
+# modifiée lors de la création d'un utilisateur, alors son homedir sera calculé
+# par la formule suivante : HOMEBASE + '/' + username
+HOME_BASE = "/home"
+
+# Renvoie le homedir d'un utilisateur
+def homedir(user):
+    return "%s/%s" % (HOME_BASE, user.username)
+
+# UID minimal pour un utilisateur
+MIN_UID = 10000
+# GID minimal pour un groupe
+MIN_GID = 10000
+# GID par défaut pour un utilisateur ("users")
+DEFAULT_GID = 100
+
+# Renvoie la date d'expiration par défaut
+def default_expire(): 
+    # retourne la date de fin du mois actuel (j'ai pas mieux comme algo, j'ai
+    # peu de neurone) : on se place au debut du mois actuel, on va 32 plus
+    # tard, on prend le premier jour du mois obtenu... et on recule d'un jour.
+    # Ouf.
+    return ( datetime.date.today().replace(day=1) + \
+             datetime.timedelta(32) ).replace(day=1) - datetime.timedelta(1)
+
+# import de la configuration : on peut y écraser toutes les définitions
+# précédentes
+from aufusers.conf import *
 
 
 class User(models.Model):

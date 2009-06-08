@@ -1,3 +1,11 @@
+auf-django-users (0.5.7) unstable; urgency=low
+
+  * nss/models.py: import plus générique des données de configuration,
+    qui permet de ne pas planter quand quelque chose est oublié dans
+    conf.py
+
+ -- Thomas NOEL <thomas.noel@auf.org>  Mon, 08 Jun 2009 11:20:46 +0000
+
 auf-django-users (0.5.6) unstable; urgency=low
 
   * conf.py: ajout d'un MIN_GID. L'application plante s'il n'existe pas, c'est
