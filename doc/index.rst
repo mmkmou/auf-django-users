@@ -26,6 +26,7 @@ de choses inutiles.
    acces
    api
    contrib
+   annexes
 
 
 Index et tables
