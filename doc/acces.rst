@@ -8,7 +8,7 @@ Pour cela, il faut gérer les *utilisateurs Django* de l'application. Cette
 gestion se fait en tant qu'administrateur de l'application, à l'adresse
 http://adresse_du_site/admin/auth/
 
-    .. image:: auth-accueil.*
+    .. image:: acces-accueil.*
 
 La technique la plus efficace est :
  #. Créer un ou plusieurs groupes ayant accès à certaines possibilités de l'application, par exemple la création et la modification des comptes ;
@@ -33,7 +33,7 @@ Pour créer un groupe d'utilisateurs qui gérent les abonnés au quotidien, on
 ajoute un groupe nommé « Créateurs de comptes » et on lui attribue les droits
 d'ajout et de modification sur les comptes :
 
-    .. image:: auth-groupe.*
+    .. image:: acces-groupe.*
 
 Création d'un utilisateur dans ce groupe
 ----------------------------------------
@@ -43,12 +43,12 @@ utilisateur, il faut veiller à deux choses. Tout d'abord, cocher la case **«
 Status équipe »** qui permettra à l'utilisateur de se connecter au site (vers
 le milieu de la page lorsqu'on crée un utilisateur) :
 
-    .. image:: auth-user-equipe.*
+    .. image:: acces-statut-equipe.*
 
 puis placer l'utilisateur dans le (ou les) groupe(s) désiré(s), en les cochant
 dans la liste proposée à la fin de la page de création d'un utilisateur :
 
-    .. image:: auth-user-groupe.*
+    .. image:: acces-coche-groupe.*
 
 L'utilisateur ainsi créé peut ajouter et modifier des comptes utilisateurs sur
 le système NSS.

@@ -57,3 +57,18 @@ Web de test : ::
 La partie Web de l'application est alors visible sur http://127.0.0.1:8000/admin/.
 Il faut s'y connecter avec le compte administrateur créé lors du ``syncdb``.
 
+Première photo d'écran
+----------------------
+
+Pour faire moderne et pour donner envie au lecteur encore hésitant, voici à
+quoi ressemble un peu l'application :
+
+.. image:: premiers-pas-connexion.*
+
+Vous accédez alors directement à la liste des utilisateurs disponibles sur le
+système :
+
+.. image:: premiers-pas-liste.*
+
+L'interface est sensée être suffisament intuitive pour éviter d'autres explications...
+
