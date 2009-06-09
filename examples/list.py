@@ -1,13 +1,8 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 
-# on indique quel sera le module de configuration
-import os
-os.environ['DJANGO_SETTINGS_MODULE']="aufusers.settings"
-
-# et on importe les classes du modèle de l'application "nss"
-# (User, Group, GroupList)
-from aufusers.nss.models import *
+# on importe les classes dont on a besoin (parmis User, Group, GroupList, ...)
+from aufusers import User
 
 # A partir de là commence le script en tant que tel, utilisant les
 # classes et leurs méthodes... Ici on va faire la liste de tous les
