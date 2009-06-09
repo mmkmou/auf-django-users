@@ -1,3 +1,10 @@
+auf-django-users (0.5.8) unstable; urgency=low
+
+  * doc/: description du système de gestion des droits Django,
+    et ajout d'annexes concernant auf-poste-client et auf-mkhomedir
+
+ -- Thomas NOEL <thomas.noel@auf.org>  Tue, 09 Jun 2009 10:48:17 +0000
+
 auf-django-users (0.5.7) unstable; urgency=low
 
   * nss/models.py: import plus générique des données de configuration,
