@@ -5,7 +5,6 @@ TODO
 -------
 
  - champ mot de passe : longueur 64 suffisante (cf algo du shadow de jaunty) ?
- - doc sur la gestion des droits des users Django
  - quelques scripts d'exemple d'utilisation concrete de import aufusers
 
 0.6
