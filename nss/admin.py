@@ -29,6 +29,26 @@ class UserAdminForm(forms.ModelForm):
             return None
         raise forms.ValidationError('Les deux mots de passe doivent être identiques.')
 
+    def clean_username(self):
+        """Vérification du format du username : lettres ASCII minuscules, chiffres, - . et _"""
+        username_ok = 'abcdefghijklmnopqrstuvwxyz0123456789-._'
+        username = self.cleaned_data['username']
+        for c in username:
+            if c not in username_ok:
+                raise forms.ValidationError("Le nom d'utilisateur ne doit contenir que des lettres minuscules (sans accent), des chiffres et les caractères - _ et .")
+        if not username[0].isalpha():
+            raise forms.ValidationError("Le nom d'utilisateur doit commencer par une lettre")
+        return username
+
+    def clean_gecos(self):
+        """Vérification du format du gecos : espace, lettres ASCII, chiffres, - . et _"""
+        gecos_ok = ' abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._'
+        gecos = self.cleaned_data['gecos']
+        for c in gecos:
+            if c not in gecos_ok:
+                raise forms.ValidationError("Les informations GECOS ne doivent contenir que des lettres (sans accent), des chiffres et les caractères - _ et .")
+        return gecos
+
 
 class GroupListInline(admin.TabularInline):
     model = GroupList
