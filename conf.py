@@ -71,3 +71,15 @@ INSTALLED_APPS_MORE = (
 # note : la configuration de contrib.mail se fait dans le fichier
 # /etc/auf-django-users/contrib.mail.conf.py
 
+
+# URLs spécifiques au site
+# A modifier en fonction de vos besoins locaux, des contribs activées, etc...
+
+#from django.conf.urls.defaults import *
+#urlpatterns = patterns('',
+#    # redirection de la page d'accueil
+#    ('^/*$', 'django.views.generic.simple.redirect_to', {'url': 'dakar/'}),
+#    # urls définies par la contrib de gestion des utilisateurs "à la dakaroise"
+#    (r'^dakar/', include('aufusers.contrib.dakar.urls')),
+#)
+

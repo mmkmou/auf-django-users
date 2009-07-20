@@ -3,8 +3,10 @@ auf-django-users (0.5.9) unstable; urgency=low
   * nss/admin.py: clean_gecos et clean_username pour vérification
     des données reçues par le formulaire (uniquement des lettres
     ASCII, chiffres, etc.)
+  * urls.py: possibilité de configurer les URLs dans conf.py (petit
+    exemple fourni)
 
- -- Thomas NOEL <thomas.noel@auf.org>  Mon, 20 Jul 2009 14:10:54 +0000
+ -- Thomas NOEL <thomas.noel@auf.org>  Mon, 20 Jul 2009 14:31:02 +0000
 
 auf-django-users (0.5.8) unstable; urgency=low
 

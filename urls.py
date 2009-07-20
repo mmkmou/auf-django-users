@@ -3,18 +3,22 @@
 from django.conf.urls.defaults import *
 from django.conf import settings
 
-# Uncomment the next two lines to enable the admin:
+# on tente d'importer les urlpatterns de la configuration
+try:
+    from aufusers.conf import urlpatterns
+except:
+    urlpatterns = patterns('')
+
+# enable the admin:
 from django.contrib import admin
 admin.autodiscover()
 
-urlpatterns = patterns('',
+urlpatterns = urlpatterns + patterns('',
     # documentation admin ('django.contrib.admindocs' in INSTALLED_APPS):
     (r'^admin/doc/', include('django.contrib.admindocs.urls')),
     # interface d'administration
     (r'^admin/(.*)', admin.site.root),
-    # exemple de template
-    (r'^nss/', include('aufusers.nss.urls')),
-    # redirection de / vers la gestion des utilisateurs nss
+    # page d'accueil : redirection de / vers la gestion des utilisateurs nss
     ('^/*$', 'django.views.generic.simple.redirect_to', {'url': 'admin/nss/user/'}),
 )
 
