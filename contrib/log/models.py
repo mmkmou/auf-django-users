@@ -5,7 +5,7 @@ Pour chaque abonné (compte *nss*), trace l'historique des modifications.
 
 from django.db import models
 
-import datetime
+import datetime, time
 
 # pour connexion avec le module de gestion des comptes nss
 from django.db.models.signals import pre_save, post_save, post_delete
@@ -13,6 +13,12 @@ from aufusers.nss.models import User
 
 # pour comparer les mots de passe...
 from aufusers.lib.utils import password_crypt
+
+# pour stocker les détails : json
+try:
+    import json
+except:
+    import simplejson as json
 
 
 MODIFICATION_TYPES = (
@@ -34,6 +40,7 @@ MODIFICATION_STYLES = {
     'other': 'color: black;',
 }
 
+
 class Log(models.Model):
     """
     Un *Log* représente une modification d'un certain utilisateur à un certain moment.
@@ -42,17 +49,18 @@ class Log(models.Model):
        qui permettent de retrouver de quel utilisateur il s'agit. On doit
        fournir la date de création, car l'utilisateur 'toto' créé en 2009
        est différent de l'utilisateur 'toto' créé en 2004 puis supprimé en 2006.
-     * ``type`` et ``details`` : type de la modification, et détails annexes éventuels
-     * ``date`` : date de la modification
+     * ``type`` et ``details`` : type de modification, et détails annexes
+       éventuels (en format json)
+     * ``date`` : date de modification
      * ``agent`` : personne ayant demandé la modification
 
     """
     username = models.CharField("nom d'utilisateur", max_length=64)
     creation = models.DateTimeField("date de création du compte")
-    type = models.CharField("type de la modification", max_length="16",
+    type = models.CharField("type de modification", max_length="16",
         choices=MODIFICATION_TYPES, default='other', blank=False)
-    details = models.CharField("détails", max_length=128, default='')
-    date = models.DateTimeField("date de la modification", auto_now_add=True)
+    details = models.CharField("détails (json)", max_length=128, default='')
+    date = models.DateTimeField("date de modification", auto_now_add=True)
     agent = models.CharField("modificateur", max_length=32)
 
     class Meta:
@@ -70,16 +78,45 @@ class Log(models.Model):
     username_creation.short_description = 'utilisateur'
     username_creation.admin_order_field = 'username'
 
+    def details_json2dic(self):
+        """
+        Interprete les données json du champ details.
+        Transforme les dates (expire) en objets datetime.date. 
+        NB : si details n'est pas au format JSON, cette fonction levera une
+        exception.
+        """
+        dic = json.loads(self.details)
+        # les champs 'expire' sont des dates, on les transforme
+        # en objets datetime.date
+        for key in dic:
+            if key.startswith('expire'):
+                dic[key] = datetime.date(*time.strptime(dic[key],'%Y-%m-%d')[:3])
+        return dic
+
+    def details_json2str(self):
+        try:
+            dic = self.details_json2dic()
+            return ', '.join([ '%s=%s' % (key, value) for key,value in dic.items() ])
+        except:
+            return self.details
+
     def colored_modif(self):
         """Affichage de la modification, en couleur et en odorama"""
         if self.details:
-            modif = "%s : %s" % (self.get_type_display(), self.details)
+            modif = "%s : %s" % (self.get_type_display(), self.details_json2str())
         else:
             modif = self.get_type_display()
         return u'<span style="%s">%s</span>' % (MODIFICATION_STYLES[self.type], modif)
     colored_modif.short_description = "Modification"
     colored_modif.allow_tags = True
     colored_modif.admin_order_field = 'type'
+
+    def colored_type(self):
+        """Affiche du type de modif, en couleur"""
+        return u'<span style="%s">%s</span>' % (MODIFICATION_STYLES[self.type], self.type)
+    colored_type.short_description = "Type"
+    colored_type.allow_tags = True
+    colored_type.admin_order_field = 'type'
 
     def save(self, force_insert=False, force_update=False):
         """
@@ -104,12 +141,22 @@ class Log(models.Model):
 # et agir en fonction
 #
 
-# détection des modifications (lors du pre_save)
+def json_serial(obj):
+    """
+    Fonction qui serialise un objet python. Utile pour JSONifier
+    des dictionnaires contenant des objets datetime.date.
+    """
+    return '%s' % obj
+
+
 def user_pre_save(sender, **kwargs):
-    """Procédure lancée avant chaque modification d'un abonné. On compare
-    les données avec l'utilisateur actuel, et on conserve dans un attribut
-    log_post_save toutes les modifications constatées. Ces modifications seront
-    logées lors du post_save, donc quand le save() aura vraiment fonctionné."""
+    """
+    Procédure de détection des modifications, lancée avant modification d'un abonné.
+    On compare les données avec l'utilisateur actuel, et on conserve dans un
+    attribut log_post_save toutes les modifications constatées. Ces
+    modifications seront logées lors du post_save, donc quand le save() aura
+    vraiment fonctionné.
+    """
     user = kwargs['instance']
     # on ne comptabilise que les comptes locaux
     if user.source != 'LOCAL':
@@ -135,19 +182,23 @@ def user_pre_save(sender, **kwargs):
     if password_crypt( user.password ) != current.password:
         user.log_post_save['password'] = ''
     if user.expire != current.expire:
-        user.log_post_save['expire'] = "%s -> %s (%+d)" % (current.expire, user.expire, (user.expire-current.expire).days)
+        user.log_post_save['expire'] = json.dumps({ 'expire_old': current.expire,
+                                                    'expire_new': user.expire }, default=json_serial)
     if user.gecos != current.gecos:
-        user.log_post_save['gecos'] = "'%s' -> '%s'" % (current.gecos, user.gecos)
+        user.log_post_save['gecos'] = json.dumps({ 'gecos_old': current.gecos,
+                                                   'gecos_new': user.gecos}, default=json_serial)
 
 # connexion au signal "abonné enregistré"
 pre_save.connect(user_pre_save, sender=User)
 
 
-# log des créations/modifications des comptes (post_save)
 def user_post_save(sender, **kwargs):
-    """Procédure lancée après l'ajout ou la modification d'un abonné.
-    S'il s'agit d'une création alors on log la création, sinon on log les
-    modifications détectées lors du pre_save."""
+    """
+    Procédure d'enregistrement des crétions et modifications, lancée après
+    l'ajout ou la modification d'un abonné. S'il s'agit d'une création alors
+    on log la création, sinon on log les modifications détectées lors du
+    pre_save.
+    """
     user = kwargs['instance']
     # on ne log que pour les comptes locaux
     if user.source == 'LOCAL':
@@ -160,7 +211,9 @@ def user_post_save(sender, **kwargs):
             agent = '<api>'
         if kwargs['created'] :
             # il s'agit d'une création
-            details = "uid %s, nom complet '%s'" % (user.uid, user.gecos)
+            details = json.dumps({ 'uid' : user.uid,
+                                   'gecos': user.gecos,
+                                   'expire': user.expire}, default=json_serial)
             Log( username = user.username, creation = user.creation,
                  type = 'create', agent = agent , details = details ).save()
         else:
@@ -175,12 +228,12 @@ def user_post_save(sender, **kwargs):
 post_save.connect(user_post_save, sender=User)
 
 
-# log de la suppression des comptes (post_delete)
 def user_post_delete(sender, **kwargs):
-    """Procédure lancée après chaque suppression d'un abonné.
-
+    """
+    Procédure qui enregistre la suppression d'un abonné.
     ATTENTION : cette methode n'est pas appelé lors d'un QuerySet.delete()
-    sur des objets User. Il faut donc TOUJOURS supprimer les User un par un."""
+    sur des objets User. Il faut donc TOUJOURS supprimer les User un par un.
+    """
     user = kwargs['instance']
     # on ne comptabilise que les comptes locaux
     if user.source != 'LOCAL':
@@ -197,7 +250,8 @@ def user_post_delete(sender, **kwargs):
     Log( username = user.username,
          creation = user.creation,
          type = 'delete',
-         agent = agent ).save()
+         agent = agent,
+         details = json.dumps({'expire': user.expire}, default=json_serial) ).save()
 
 # connexion au signal "abonné supprimé"
 # RAPPEL : ce signal est lancé uniquement lorsqu'on efface un objet ; il n'est

@@ -8,7 +8,7 @@ Homepage: http://git.auf.org/?p=thomas.git;a=tree;f=auf-django-users
 
 Package: auf-django-users
 Architecture: all
-Depends: python (>= 2.3), python-support (>= 0.7.1), python-django (>= 1.0)
+Depends: python (>= 2.3), python-support (>= 0.7.1), python-django (>= 1.0), python-simplejson
 Recommends: sqlite3, python-mysqldb
 Suggests: apache2, libapache2-mod-wsgi, mysql-server
 Description: Système de gestion d'utilisateurs compatible NSS
