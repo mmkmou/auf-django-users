@@ -1,3 +1,13 @@
+auf-django-users (0.5.11) unstable; urgency=low
+
+  * contrib/log/models.py: gestion des details de log dans l'ancien
+    format. On peut récupérer les infos via l'attribut (property) details_dict
+    qui sera toujours un dict, quel que soit le format de details (JSON ou
+    ancien format). C'est un peu bidouillé, mais je paye de prix d'une erreur
+    de conception initiale... Et si vous êtes pas content, c'est pareil.
+
+ -- Thomas NOEL <thomas.noel@auf.org>  Tue, 21 Jul 2009 15:32:08 +0000
+
 auf-django-users (0.5.10) unstable; urgency=low
 
   * nss/models.py: verification formats username, gecos ; raise

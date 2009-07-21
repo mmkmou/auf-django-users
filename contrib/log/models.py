@@ -5,8 +5,6 @@ Pour chaque abonné (compte *nss*), trace l'historique des modifications.
 
 from django.db import models
 
-import datetime, time
-
 # pour connexion avec le module de gestion des comptes nss
 from django.db.models.signals import pre_save, post_save, post_delete
 from aufusers.nss.models import User
@@ -19,6 +17,8 @@ try:
     import json
 except:
     import simplejson as json
+
+import datetime, time, re
 
 
 MODIFICATION_TYPES = (
@@ -59,7 +59,7 @@ class Log(models.Model):
     creation = models.DateTimeField("date de création du compte")
     type = models.CharField("type de modification", max_length="16",
         choices=MODIFICATION_TYPES, default='other', blank=False)
-    details = models.CharField("détails (json)", max_length=128, default='')
+    details = models.CharField("détails (format json)", max_length=128, default='')
     date = models.DateTimeField("date de modification", auto_now_add=True)
     agent = models.CharField("modificateur", max_length=32)
 
@@ -78,32 +78,65 @@ class Log(models.Model):
     username_creation.short_description = 'utilisateur'
     username_creation.admin_order_field = 'username'
 
-    def details_json2dic(self):
-        """
-        Interprete les données json du champ details.
-        Transforme les dates (expire) en objets datetime.date. 
-        NB : si details n'est pas au format JSON, cette fonction levera une
-        exception.
-        """
-        dic = json.loads(self.details)
-        # les champs 'expire' sont des dates, on les transforme
-        # en objets datetime.date
-        for key in dic:
-            if key.startswith('expire'):
-                dic[key] = datetime.date(*time.strptime(dic[key],'%Y-%m-%d')[:3])
-        return dic
+    INFINITY = datetime.date(2038, 01, 19)
 
-    def details_json2str(self):
+    @property
+    def details_dict(self):
+        """
+        Interprete les données JSON du champ details, renvoie un dictionnaire.
+        Transforme les dates (expire) en objets datetime.date. 
+        NB : si "details" n'est pas au format JSON, tente d'analyser les
+        données depuis l'ancien format de log (string). On gère l'historique, quoi.
+        """
         try:
-            dic = self.details_json2dic()
-            return ', '.join([ '%s=%s' % (key, value) for key,value in dic.items() ])
+            dic = json.loads(self.details)
+            # tous les champs nommés 'expire*' sont des dates, on les
+            # transforme en objets datetime.date
+            for key in dic:
+                if key.startswith('expire'):
+                    dic[key] = datetime.date(*time.strptime(dic[key],'%Y-%m-%d')[:3])
+            return dic
         except:
-            return self.details
+            # ce n'est pas du JSON, alors c'est un log dans l'ancien format (version < 0.5.10)
+            # on analyse alors la chaine de caractère... gestion de l'historique très bêbete,
+            # mais ça marche.
+            if self.type == 'create':
+                r = re.match("^uid (?P<uid>\d+), nom complet '(?P<gecos>.*)'", self.details)
+                if r:
+                    dic = r.groupdict()
+                    dic['uid'] = int(dic['uid'])
+                    dic['expire'] = self.INFINITY # l'ancien système de log ne logait pas l'expire :(
+                    return dic
+                else:
+                    return { 'uid': 0, 'gecos': '(inconnu)', 'expire': self.INFINITY }
+            elif self.type == 'gecos':
+                r = re.match("^'(?P<gecos_old>.*)' -> '(?P<gecos_new>.*)'", self.details)
+                if r:
+                    return r.groupdict()
+                else:
+                    return { 'gecos_old': '(inconnu)', 'gecos_new': '(inconnu)' }
+            elif self.type == 'expire':
+                r = re.match("^(?P<expire_old>\d{4}-\d{2}-\d{2}) -> (?P<expire_new>\d{4}-\d{2}-\d{2})", self.details)
+                if r:
+                    dic = r.groupdict()
+                    for key in dic:  # on transforme les expire* en objets datetime.date
+                        dic[key] = datetime.date(*time.strptime(dic[key],'%Y-%m-%d')[:3])
+                    return dic
+                else:
+                    return { 'expire_old': self.INFINITY, 'expire_new': self.INFINITY }
+            elif self.type == 'delete':
+                return { 'expire' : self.INFINITY } # l'ancien système de log ne logait pas l'expire :(
+            else: # autres cas : on ne loggue rien
+                return { }
+                
+    @property
+    def details_str(self):
+        return ', '.join([ '%s=%s' % (key, value) for key,value in self.details_dict.items() ])
 
     def colored_modif(self):
         """Affichage de la modification, en couleur et en odorama"""
         if self.details:
-            modif = "%s : %s" % (self.get_type_display(), self.details_json2str())
+            modif = "%s : %s" % (self.get_type_display(), self.details_str)
         else:
             modif = self.get_type_display()
         return u'<span style="%s">%s</span>' % (MODIFICATION_STYLES[self.type], modif)
@@ -143,8 +176,9 @@ class Log(models.Model):
 
 def json_serial(obj):
     """
-    Fonction qui serialise un objet python. Utile pour JSONifier
-    des dictionnaires contenant des objets datetime.date.
+    Fonction qui serialise un objet python. Utilisée pour JSONifier
+    des dictionnaires contenant des objets datetime.date, qui seront
+    enregistrés en string de forme YYYY-MM-DD.
     """
     return '%s' % obj
 
@@ -213,7 +247,7 @@ def user_post_save(sender, **kwargs):
             # il s'agit d'une création
             details = json.dumps({ 'uid' : user.uid,
                                    'gecos': user.gecos,
-                                   'expire': user.expire}, default=json_serial)
+                                   'expire': user.expire }, default=json_serial)
             Log( username = user.username, creation = user.creation,
                  type = 'create', agent = agent , details = details ).save()
         else:
@@ -251,7 +285,7 @@ def user_post_delete(sender, **kwargs):
          creation = user.creation,
          type = 'delete',
          agent = agent,
-         details = json.dumps({'expire': user.expire}, default=json_serial) ).save()
+         details = json.dumps({ 'expire': user.expire }, default=json_serial) ).save()
 
 # connexion au signal "abonné supprimé"
 # RAPPEL : ce signal est lancé uniquement lorsqu'on efface un objet ; il n'est
