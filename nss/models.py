@@ -129,8 +129,8 @@ class User(models.Model):
         avant de procéder à l'enregistrement réel de l'utilisateur dans la base
         de données :
 
-         * si l'utilisateur (indiqué par son uid) existe déjà, les champs
-           ``username`` et ``source`` ne seront pas modifiés
+         * si l'utilisateur (indiqué par son username) existe déjà, les champs
+           ``uid`` et ``source`` ne sont pas modifiables (exception levée)
          * si ``source`` n'est pas 'LOCAL', alors l'enregistrement n'est pas
            effectué, sauf si on précise *force_source=True* lors de l'appel à
            *save()*
@@ -146,21 +146,32 @@ class User(models.Model):
         effectué.
         """
         # surcharges avant enregistrement :
-        # on interdit les changements sur "username" ou "source" avec ça :
+        # on interdit les changements sur "uid" ou "source" avec ça :
         try:
             # si l'objet existe déjà, on récupère ses données actuelles
             current = User.objects.get(pk=self.pk) 
             # on refuse de modifier l'uid ou la source, il y a trop
             # d'implications par ailleurs
-            self.uid = current.uid
-            self.source = current.source
+            if self.uid != current.uid:
+                raise ValueError("changement d'uid interdit")
+            if self.source != current.source:
+                raise ValueError('changement de source interdit')
         except:
-            pass
-        # on enregistre que si la source est 'LOCAL' (pour forcer
+            # si l'utilisateur n'existe pas encore : vérification du format du username
+            username_ok = 'abcdefghijklmnopqrstuvwxyz0123456789-._'
+            for c in self.username:
+                if c not in username_ok:
+                    raise ValueError("username ne doit contenir que des minuscules ASCII, des chiffres, - _ ou .")
+        # on n'enregistre que si la source est 'LOCAL' (pour forcer
         # l'enregistrement, il faut ajouter un force_source=True lors de
         # l'appel)
         if self.source != "LOCAL" and not force_source:
             return
+        # on vérifie le format de GECOS (ascii)
+        gecos_ok = ' abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._'
+        for c in self.gecos:
+            if c not in gecos_ok:
+                raise ValueError("GECOS ne doit contenir que des lettres ASCII, des chiffres, - _ ou .")
         # si l'objet n'a pas d'UID proposé, on en calcule un,
         # en sachant qu'il doit être plus grand que MIN_UID
         if self.uid == None:
