@@ -70,7 +70,7 @@ class UserAdmin(admin.ModelAdmin):
                           'expire', 'gecos', ), }
         ),
         ( "Données destinées au système", 
-            { 'fields': ( 'homedir', 'shell', 'uid', 'gid', ),
+            { 'fields': ( 'homedir', 'shell', 'gid', ),
               'classes': ( 'collapse', ), }
         ),
         ( "Données de gestion", 
