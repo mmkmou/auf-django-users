@@ -40,6 +40,19 @@ MODIFICATION_STYLES = {
     'other': 'color: black;',
 }
 
+def expire_diff(date_modif, expire_old, expire_new):
+    """
+    today, old et new sont des datetime.date
+    Renvoie un entier correspondant au nombre de jours ajoutés (ou
+    retirés) à l'abonnement, en fonction de la date du jour de la modif
+    (today), de l'ancienne (old) et de la nouvelle (new) date d'expiration.
+    """
+    if max(expire_old,expire_new) <= date_modif: # new et old dans le passé : pas d'impact
+        return 0
+    if expire_old <= expire_new:   # on a ajouté des jours
+        return ( expire_new - max(date_modif,expire_old) ).days
+    else:            # on a retiré des jours
+        return ( max(date_modif,expire_new) - expire_old ).days
 
 class Log(models.Model):
     """
@@ -65,8 +78,8 @@ class Log(models.Model):
 
     class Meta:
         db_table = "log"
-        verbose_name = "suivi d'un compte"
-        verbose_name_plural = "suivis des comptes"
+        verbose_name = "suivi de compte"
+        verbose_name_plural = "suivis de compte"
 
     def __unicode__(self):
         return u"%s : modification %s le %s par %s" % \
@@ -80,22 +93,17 @@ class Log(models.Model):
 
     INFINITY = datetime.date(2038, 01, 19)
 
-    @property
     def details_dict(self):
         """
         Interprete les données JSON du champ details, renvoie un dictionnaire.
         Transforme les dates (expire) en objets datetime.date. 
+        Si la modification est de type 'expire', calcule le nombre de jours
+        ajoutés ou retirés à l'abonnement (expire_diff).
         NB : si "details" n'est pas au format JSON, tente d'analyser les
         données depuis l'ancien format de log (string). On gère l'historique, quoi.
         """
         try:
             dic = json.loads(self.details)
-            # tous les champs nommés 'expire*' sont des dates, on les
-            # transforme en objets datetime.date
-            for key in dic:
-                if key.startswith('expire'):
-                    dic[key] = datetime.date(*time.strptime(dic[key],'%Y-%m-%d')[:3])
-            return dic
         except:
             # ce n'est pas du JSON, alors c'est un log dans l'ancien format (version < 0.5.10)
             # on analyse alors la chaine de caractère... gestion de l'historique très bêbete,
@@ -121,26 +129,63 @@ class Log(models.Model):
                     dic = r.groupdict()
                     for key in dic:  # on transforme les expire* en objets datetime.date
                         dic[key] = datetime.date(*time.strptime(dic[key],'%Y-%m-%d')[:3])
+                    dic['expire_diff'] = expire_diff( date_modif=self.date.date(),
+                                                      expire_old=dic['expire_old'],
+                                                      expire_new=dic['expire_new'])
                     return dic
                 else:
-                    return { 'expire_old': self.INFINITY, 'expire_new': self.INFINITY }
+                    return { 'expire_old': self.INFINITY, 
+                             'expire_new': self.INFINITY,
+                             'expire_diff': 0 }
             elif self.type == 'delete':
                 return { 'expire' : self.INFINITY } # l'ancien système de log ne logait pas l'expire :(
             else: # autres cas : on ne loggue rien
                 return { }
+        else:
+            # tous les champs nommés 'expire*' sont des dates, on les
+            # transforme en objets datetime.date
+            for key in dic:
+                if key.startswith('expire'):
+                    dic[key] = datetime.date(*time.strptime(dic[key],'%Y-%m-%d')[:3])
+            if self.type == 'expire':
+                dic['expire_diff'] = expire_diff( date_modif=self.date.date(),
+                                                  expire_old=dic['expire_old'],
+                                                  expire_new=dic['expire_new'] )
+            return dic
                 
-    @property
     def details_str(self):
-        return ', '.join([ '%s=%s' % (key, value) for key,value in self.details_dict.items() ])
+        """
+        Renvoie les détails de la modification, sous forme d'une chaine
+        de caractères "lisible par un humain", en fonction du type de la modif.
+        """
+        dic = self.details_dict()
+        if self.type == 'create':
+            if dic['expire'] != self.INFINITY:
+                return '"%(gecos)s" (uid %(uid)d) expire le %(expire)s' % dic
+            else:
+                return '"%(gecos)s" (uid %(uid)d)' % dic
+        elif self.type == 'gecos':
+            return '"%(gecos_new)s" (remplace "%(gecos_old)s")' % dic
+        elif self.type == 'expire':
+            # TODO : affichage de nombre de jours ajoutés en fonction
+            # de la date à laquelle la modif a été faite
+            return '%(expire_new)s (remplace %(expire_old)s) %(expire_diff)+d jours' % dic
+        elif self.type == 'delete':
+            if dic['expire'] != self.INFINITY:
+                return 'expirait le %(expire)s' % dic
+            else:
+                return ''
+        else:
+            return ', '.join([ '%s=%s' % (key, value) for key,value in dic.items() ])
 
     def colored_modif(self):
         """Affichage de la modification, en couleur et en odorama"""
         if self.details:
-            modif = "%s : %s" % (self.get_type_display(), self.details_str)
+            modif = "%s : %s" % (self.get_type_display(), self.details_str())
         else:
             modif = self.get_type_display()
         return u'<span style="%s">%s</span>' % (MODIFICATION_STYLES[self.type], modif)
-    colored_modif.short_description = "Modification"
+    colored_modif.short_description = "Détails de la modification"
     colored_modif.allow_tags = True
     colored_modif.admin_order_field = 'type'
 
@@ -154,7 +199,7 @@ class Log(models.Model):
     def save(self, force_insert=False, force_update=False):
         """
         Enregistre une nouvelle modification pour un compte.
-        Particularités : on interdit la possibilité de modifier un log
+        Particularité : on interdit la possibilité de modifier un log
         """
         return super(Log, self).save(force_insert=True, force_update=False)
 

@@ -1,3 +1,9 @@
+auf-django-users (0.5.12) unstable; urgency=low
+
+  * contrib/log/models.py: affichage des logs plus "humain"
+
+ -- Thomas NOEL <thomas.noel@auf.org>  Wed, 22 Jul 2009 17:22:02 +0000
+
 auf-django-users (0.5.11) unstable; urgency=low
 
   * contrib/log/models.py: gestion des details de log dans l'ancien
