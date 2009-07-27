@@ -7,25 +7,9 @@ est d'utiliser un serveur compatible WSGI. ``apache2`` et son module
 
   # aptitude install apache2 libapache2-mod-wsgi
 
-Un exemple de configuration est disponible dans `/etc/auf-django-users/apache.conf` : ::
+Un exemple de configuration est disponible dans `/etc/auf-django-users/apache.conf` :
 
-  # à placer dans un <VirtualHost ...>
-  WSGIScriptAlias / /usr/share/auf-django-users/aufusers.wsgi
-  Alias /media /usr/share/auf-django-users/media
-  <Directory /usr/share/auf-django-users/media>
-    Options Indexes FollowSymLinks MultiViews
-    AllowOverride None
-    Order allow,deny
-    allow from all
-  </Directory>
-  # partie statique de l'admin : celle fournie par Django
-  Alias /admin/media /usr/share/python-support/python-django/django/contrib/admin/media
-  <Directory /usr/share/python-support/python-django/django/contrib/admin/media/>
-    Options Indexes FollowSymLinks MultiViews
-    AllowOverride None
-    Order allow,deny
-    allow from all
-  </Directory>
+.. literalinclude:: ../apache.conf
 
 .. note::
    Si la base de donnée est en SQLite (c'est le cas en mode *test*), il faut que l'utilisateur
