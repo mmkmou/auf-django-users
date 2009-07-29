@@ -167,7 +167,7 @@ class User(models.Model):
         # l'enregistrement, il faut ajouter un force_source=True lors de
         # l'appel)
         if self.source != "LOCAL" and not force_source:
-            return
+            raise ValueError("source != LOCAL nécessite save(force_source=True)")
         # on vérifie le format de GECOS (ascii)
         gecos_ok = ' abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._'
         for c in self.gecos:
