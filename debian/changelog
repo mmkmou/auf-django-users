@@ -1,3 +1,13 @@
+auf-django-users (0.5.13) unstable; urgency=low
+
+  * nss/models.py: un print qui trainait...
+  * nss/models.py: save() lance une exception si on tente de
+    l'appeler avec une source non LOCAL (au lieu d'un simple return
+    qui donnait l'impression que tout allait bien... grmbll)
+  * examples/ca2django.py: exemple de synchro base AUF vers auf-django
+
+ -- Thomas NOEL <thomas.noel@auf.org>  Wed, 29 Jul 2009 12:33:30 +0000
+
 auf-django-users (0.5.12) unstable; urgency=low
 
   * contrib/log/models.py: affichage des logs plus "humain"
