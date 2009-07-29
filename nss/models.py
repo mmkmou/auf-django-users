@@ -159,11 +159,10 @@ class User(models.Model):
         else:
             # on refuse de modifier l'uid ou la source, il y a trop
             # d'implications par ailleurs
+            if self.source != current.source:
+                raise ValueError('changement de source interdit')
             if self.uid != current.uid:
                 raise ValueError("changement d'uid interdit")
-            if self.source != current.source:
-                print "raise source"
-                raise ValueError('changement de source interdit')
         # on n'enregistre que si la source est 'LOCAL' (pour forcer
         # l'enregistrement, il faut ajouter un force_source=True lors de
         # l'appel)
