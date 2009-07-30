@@ -16,3 +16,6 @@ idée : en profiter pour passer en 0.6 parce que on commence à bien changer ?
     puisse modifier le schéma de la base...  pas supra génial, mais après
     tout... on n'a rien sans rien, comme disent les grand-mères, voilà c'est ça.
 
+ => ajout python-django-south dans les Depends
+ => ajout "south" dans les INSTALLED_APPS de settings.py
+
