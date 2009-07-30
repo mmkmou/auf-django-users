@@ -1,3 +1,10 @@
+auf-django-users (0.5.14) unstable; urgency=low
+
+  * aufusers.__authors__ et __version__ (à mettre à jour à chaque
+    fois, en attendant de trouver une ruse)
+
+ -- Thomas NOEL <thomas.noel@auf.org>  Thu, 30 Jul 2009 15:10:53 +0000
+
 auf-django-users (0.5.13) unstable; urgency=low
 
   * nss/models.py: un print qui trainait...

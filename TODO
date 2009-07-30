@@ -1,14 +1,12 @@
 TODO
 ====
 
-0.5.x+1
--------
-
- - champ mot de passe : longueur 64 suffisante (cf algo du shadow de jaunty) ?
  - quelques scripts d'exemple d'utilisation concrete de import aufusers
 
 0.6
 ---
+
+ utilisation de south => cf TODO.south
 
  log : proposer des méthodes pour déterminer les dates d'abo d'une personne,
        ou bien le nombre d'abo pendant une période donnée, etc... (bon, là, faut
@@ -16,11 +14,21 @@ TODO
 
  doc sur la creation de contrib
 
- validateurs sur username (a-z0-9._@:-), champs GECOS, etc...
-   note => quelle exception déclencher lors du save en cas de pépin ?
+ champ mot de passe : longueur 64 suffisante (cf algo du shadow de jaunty) ?
+
+ contrib.log : 
+  * revoir le champ details (il doit pouvoir être plus long)
+  * ajouter un champ source et tout logguer
+  * quand on sera en south : écrire un systeme de migration des vieux
+    details non-json vers le format json
 
 > 0.6
 -----
+
+contrib.mail :
+ * gestion du domaine local "xx.refer.org" depuis source == LOCAL
+ * (gestion d'autres domaines locaux en fonction de source == qlqchose ?)
+ * proposer un modèle MailUser générique qui couvre tous les cas
 
 proposer d'autres contribs
 

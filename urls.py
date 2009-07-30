@@ -18,6 +18,7 @@ urlpatterns = urlpatterns + patterns('',
     (r'^admin/doc/', include('django.contrib.admindocs.urls')),
     # interface d'administration
     (r'^admin/(.*)', admin.site.root),
+    # (r'^admin/(.*)', include('admin.site.urls')), # version django 1.1
     # page d'accueil : redirection de / vers la gestion des utilisateurs nss
     ('^/*$', 'django.views.generic.simple.redirect_to', {'url': 'admin/nss/user/'}),
 )
