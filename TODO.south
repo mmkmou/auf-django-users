@@ -19,3 +19,18 @@ idée : en profiter pour passer en 0.6 parce que on commence à bien changer ?
  => ajout python-django-south dans les Depends
  => ajout "south" dans les INSTALLED_APPS de settings.py
 
+
+postinst :
+
+* update depuis non-south :
+   syncdb --noinput
+   migrate --all 0001_initial --fake  # on se pose sur le 0001 (dernier non-south)
+   migrate                            # et on migre vers la last version
+   
+* install vierge => à la main = 
+     syncdb
+     migrate (plante avec sqlite3, mais ok : faire un migrate --fake ensuite)
+
+* update depuis south :  A TESTER => faire une modif+startmigration
+   migrate    ... mmh c'est tout, non ?
+
