@@ -18,43 +18,49 @@ set -e
 
 # FIXME / TODO : EN COURS D'ECRITURE... 
 
-
-# nom de l'utilisateur système à créer et utiliser
+# nom du groupe système à créer
 AUFDU="auf-d-u"
 
 case "$1" in
     configure)
 
 	# Creation d'un utilisateur systeme auf-d-u
-	if ! getent passwd $AUFDU > /dev/null ; then
-	  echo "Creation utilisateur systeme pour auf-django-users ($AUFDU)" 1>&2
-          adduser --system --group --quiet --home /usr/share/doc/auf-django-users/ \
-            --no-create-home --disabled-login $AUFDU
+	if ! getent group $AUFDU > /dev/null ; then
+	  echo "Creation du groupe systeme $AUFDU" 1>&2
+	  addgroup --quiet --system $AUFDU
         fi
 
 	# On place les bonnes permissions sur le fichier de configuration,
-        # s'il appartient encore encore à root:root. On utilise le groupe
-        # www-data s'il existe
-	if ! getent group www-data > /dev/null ; then
-	  OWNGROUP=$AUFDU
-	else
-	  OWNGROUP=www-data
-	fi
+        # s'il appartient encore encore à root:root.
 	find /etc/auf-django-users/conf.py -user root -group root -type f -print0 |
 	  xargs -0 -r chmod 0640
 	find /etc/auf-django-users/conf.py -user root -group root -type f -print0 |
-	  xargs -0 -r chown auf-d-u:$OWNGROUP
+	  xargs -0 -r chown root:$AUFDU
 
 	# Gestion des migrations (avec South)
+	# south ne fonctionne pas en sqlite3 : on va carrément tester si la
+	# base est une MySQL
 	OLD_VERSION="$2"
 	if [ -n "$OLD_VERSION" ]; then
-	  echo "auf-django-users: migration depuis version \`$2'" 1>&2
-	  # si on était pas encore en configuration south : on l'active
-	  if dpkg --compare-versions "$OLD_VERSION" '<=' "0.5.13" ; then
-	    echo "auf-django-users: migration vers south" 1>&2
-	    # a-d-u-manage syncdb ... (cf tuto south)
+          if grep -q "^DATABASE_ENGINE[[:space:]]*=[[:space:]]*'mysql'.*$" /etc/auf-django-users/conf.py
+	  # FIXME : ajouter un test "est-ce que la base existe et qu'on y a les droits alter & co"
+	  then
+	    # si on était pas encore en configuration south : on l'active
+	    if dpkg --compare-versions "$OLD_VERSION" '<=' "0.5.13" ; then
+	      echo "auf-django-users: migration vers south" 1>&2
+	      auf-django-users-manage.py syncdb --noinput 2>&1 || true
+	      auf-django-users-manage.py migrate --all 0001_initial --fake 2>&1 || true
+	    fi
+	    echo "auf-django-users: migration depuis version \`$OLD_VERSION'" 1>&2
+	    # c'est bon : migration south maintenant, go go go en croisant les doigts
+	    auf-django-users-manage.py migrate --all 2>&1 || true
+	  else
+	    echo "***" 1>&2
+	    echo "*** Attention, la base de auf-django-users n'est pas 'mysql'" 1>&2
+	    echo "*** le système de migration automatique de la base de donnée" 1>&2
+	    echo "*** n'a pas pu fonctionner ..." 1>&2
+	    echo "***" 1>&2
 	  fi
-	  # c'est bon : migration south maintenant, la base d'adapte
 	fi
     ;;
 

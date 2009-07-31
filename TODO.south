@@ -3,18 +3,26 @@ notes sur la tentative d'activation du mode south
 
 idée : en profiter pour passer en 0.6 parce que on commence à bien changer ?
 
- => création d'un utilisateur auf-d-u dédié à l'appli, car on va vouloir
-    lancer des scripts dans le postinst, et j'ai pas envie de les lancer
-    en tant que root... (j'ai pas trop peur du code noyau, mais y'a
-    les contrib/plug-in qui peuvent donner des effets de bord)
-
  => debian/postinst avec migration vers south (etape 1, faite une seule fois
     quand on vient d'une version <= 0.5.13) puis migration south elle-même (tentée
     à chaque upgrade)
 
+    note : migration faite en tant que root... voir s'il n'est pas possible
+    de faire ça avec un peu moins de droit (un setuid/gid nobody/auf-d-u par
+    exemple...)
+
+MAIS /!\  si on veut que les choses se passent bien lors du upgrade, il 
+faut être prudent :
+
  => pour que south puisse faire son travail, il faut que l'utilisateur MySQL
     puisse modifier le schéma de la base...  pas supra génial, mais après
     tout... on n'a rien sans rien, comme disent les grand-mères, voilà c'est ça.
+
+    ==> programmer un script qui détecte si la base est bien en MySQL,
+    qu'elle a déjà été créée, et que l'utilisateur a les droits nécessaires
+    à la gestion automatique dessus... idée : SHOW GRANTS + regex ?
+    ==> de façon annexe, et pour aider, proposer un script qui créée
+    la base et des utilisateurs dessus (admin, nssread, nssroot)
 
  => ajout python-django-south dans les Depends
  => ajout "south" dans les INSTALLED_APPS de settings.py
