@@ -28,6 +28,12 @@ case "$1" in
 	if ! getent group $AUFDU > /dev/null ; then
 	  echo "Creation du groupe systeme $AUFDU" 1>&2
 	  addgroup --quiet --system $AUFDU
+	  # on met www-data dedans, pour qu'apache puisse continuer à servir
+	  # auf-django-users. C'est pas super joli, mais je ne fais pas ce
+	  # postinst pour l'univers entier...
+	  if getent passwd www-data > /dev/null ; then
+	    adduser --quiet www-data $AUFDU
+	  fi
         fi
 
 	# On place les bonnes permissions sur le fichier de configuration,
@@ -48,12 +54,12 @@ case "$1" in
 	    # si on était pas encore en configuration south : on l'active
 	    if dpkg --compare-versions "$OLD_VERSION" '<=' "0.5.13" ; then
 	      echo "auf-django-users: migration vers south" 1>&2
-	      auf-django-users-manage.py syncdb --noinput 2>&1 || true
-	      auf-django-users-manage.py migrate --all 0001_initial --fake 2>&1 || true
+	      #auf-django-users-manage.py syncdb --noinput 2>&1 || true
+	      #auf-django-users-manage.py migrate --all 0001_initial --fake 2>&1 || true
 	    fi
 	    echo "auf-django-users: migration depuis version \`$OLD_VERSION'" 1>&2
 	    # c'est bon : migration south maintenant, go go go en croisant les doigts
-	    auf-django-users-manage.py migrate --all 2>&1 || true
+	    #auf-django-users-manage.py migrate --all 2>&1 || true
 	  else
 	    echo "***" 1>&2
 	    echo "*** Attention, la base de auf-django-users n'est pas 'mysql'" 1>&2
